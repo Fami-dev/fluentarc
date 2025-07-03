@@ -3442,13 +3442,13 @@ ElementsTable.Dropdown = (function()
 
 				local ButtonSelector = New("Frame", {
 					Size = UDim2.fromOffset(4, 14),
-					BackgroundColor3 = Color3.fromRGB(76, 194, 255),
 					Position = UDim2.fromOffset(-1, 16),
 					AnchorPoint = Vector2.new(0, 0.5),
-					ThemeTag = {
-						BackgroundColor3 = "Accent",
-					},
+					BackgroundTransparency = 0
 				}, {
+					New("UIGradient", {
+						ThemeTag = { Color = "Accent" }
+					}),
 					New("UICorner", {
 						CornerRadius = UDim.new(0, 2),
 					}),
@@ -3720,7 +3720,7 @@ ElementsTable.Slider = (function()
 			Size = UDim2.fromOffset(14, 14),
 			Image = "http://www.roblox.com/asset/?id=12266946128",
 			ThemeTag = {
-				ImageColor3 = "Accent",
+				ImageColor3 = "AccentColor",
 			},
 		})
 
@@ -3733,11 +3733,11 @@ ElementsTable.Slider = (function()
 		})
 
 		local SliderFill = New("Frame", {
-			Size = UDim2.new(0, 0, 1, 0),
-			ThemeTag = {
-				BackgroundColor3 = "Accent",
-			},
+			Size = UDim2.new(0, 0, 1, 0)
 		}, {
+			New("UIGradient", {
+				ThemeTag = { Color = "Accent" }
+			}),
 			New("UICorner", {
 				CornerRadius = UDim.new(1, 0),
 			}),
