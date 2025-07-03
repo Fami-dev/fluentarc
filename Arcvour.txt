@@ -3336,11 +3336,11 @@ Components.Window = (function()
 				OldPosition = Window.Root.Position
 
 				local inset = GuiService:GetGuiInset()
-				local viewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
+				local currentViewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
 				local margin = 10 
 
-				local targetSizeX = viewportSize.X
-				local targetSizeY = viewportSize.Y - inset.Y - margin
+				local targetSizeX = currentViewportSize.X
+				local targetSizeY = currentViewportSize.Y - inset.Y - margin
 				local targetPosX = 0
 				local targetPosY = 0
 				
@@ -3434,7 +3434,7 @@ Components.Window = (function()
 				local usableHeight = currentViewportSize.Y - inset.Y
 
 				newX = math.clamp(newX, 0, currentViewportSize.X - windowSize.X)
-				newY = math.clamp(newY, 0, usableHeight - windowSize.Y)
+				newY = math.clamp(newY, 0, usableHeight - windowSize.Y - 10)
 				
 				Window.Position = UDim2.fromOffset(newX, newY)
 
@@ -3464,7 +3464,7 @@ Components.Window = (function()
 				NewSizeY = math.max(NewSizeY, MinSize.Y)
 				
 				local MaxWidth = currentViewportSize.X - WindowPos.X
-				local MaxHeight = (currentViewportSize.Y - inset.Y) - WindowPos.Y
+				local MaxHeight = (currentViewportSize.Y - inset.Y) - WindowPos.Y - 10
 				
 				NewSizeX = math.min(NewSizeX, MaxWidth)
 				NewSizeY = math.min(NewSizeY, MaxHeight)
