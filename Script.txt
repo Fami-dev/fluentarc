@@ -1,8 +1,8 @@
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Fami-dev/fluentarc/refs/heads/main/Arcvour.txt"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Arcvour Script (CLIMB AND JUMP TOWER)",
-    SubTitle = "Converted to Fluent",
+    Title = "ArcvourHUB",
+    SubTitle = "Climb And Jump Tower",
     TabWidth = 160,
     Size = UDim2.fromOffset(500, 300),
     Acrylic = true,

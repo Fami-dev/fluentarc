@@ -56,20 +56,24 @@ local Themes = {
 	},
 	Arcvour = {
 		Name = "Arcvour",
-		Accent = Color3.fromRGB(120, 98, 180),
-		AcrylicMain = Color3.fromRGB(35, 30, 50),
-		AcrylicBorder = Color3.fromRGB(55, 50, 75),
-		AcrylicGradient = ColorSequence.new(Color3.fromRGB(35, 30, 50), Color3.fromRGB(35, 30, 50)),
-		AcrylicNoise = 1,
+		Accent = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(160, 145, 212)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 130, 180))
+		}),
+		AccentColor = Color3.fromRGB(160, 145, 212),
+		AcrylicMain = Color3.fromRGB(33, 29, 53),
+		AcrylicBorder = Color3.fromRGB(74, 69, 104),
+		AcrylicGradient = ColorSequence.new(Color3.fromRGB(44, 40, 68), Color3.fromRGB(33, 29, 53)),
+		AcrylicNoise = 0.95,
 		TitleBarLine = Color3.fromRGB(55, 50, 75),
 		Tab = Color3.fromRGB(45, 40, 65),
 		Element = Color3.fromRGB(45, 40, 65),
 		ElementBorder = Color3.fromRGB(25, 20, 40),
 		InElementBorder = Color3.fromRGB(70, 65, 90),
 		ElementTransparency = 0,
-		ToggleSlider = Color3.fromRGB(70, 65, 90),
-		ToggleToggled = Color3.fromRGB(230, 230, 230),
-		SliderRail = Color3.fromRGB(70, 65, 90),
+		ToggleSlider = Color3.fromRGB(80, 75, 105),
+		ToggleToggled = Color3.fromRGB(255, 255, 255),
+		SliderRail = Color3.fromRGB(80, 75, 105),
 		DropdownFrame = Color3.fromRGB(70, 65, 90),
 		DropdownHolder = Color3.fromRGB(30, 25, 45),
 		DropdownBorder = Color3.fromRGB(25, 20, 40),
@@ -77,8 +81,8 @@ local Themes = {
 		Keybind = Color3.fromRGB(70, 65, 90),
 		Input = Color3.fromRGB(70, 65, 90),
 		InputFocused = Color3.fromRGB(20, 15, 30),
-		InputIndicator = Color3.fromRGB(120, 98, 180),
-		InputIndicatorFocus = Color3.fromRGB(140, 118, 200),
+		InputIndicator = Color3.fromRGB(160, 145, 212),
+		InputIndicatorFocus = Color3.fromRGB(200, 130, 180),
 		Dialog = Color3.fromRGB(30, 25, 45),
 		DialogHolder = Color3.fromRGB(25, 20, 40),
 		DialogHolderLine = Color3.fromRGB(20, 15, 35),
@@ -86,10 +90,10 @@ local Themes = {
 		DialogButtonBorder = Color3.fromRGB(80, 75, 110),
 		DialogBorder = Color3.fromRGB(70, 65, 90),
 		DialogInput = Color3.fromRGB(45, 40, 65),
-		DialogInputLine = Color3.fromRGB(120, 98, 180),
-		Text = Color3.fromRGB(235, 235, 245),
-		SubText = Color3.fromRGB(180, 175, 200),
-		Hover = Color3.fromRGB(70, 65, 90),
+		DialogInputLine = Color3.fromRGB(160, 145, 212),
+		Text = Color3.fromRGB(229, 229, 234),
+		SubText = Color3.fromRGB(168, 162, 194),
+		Hover = Color3.fromRGB(80, 75, 105),
 		HoverChange = 0.04
 	}
 }
@@ -2162,6 +2166,12 @@ Components.Textbox = (function()
 
 		Creator.AddSignal(Textbox.Input.Focused, function()
 			Update()
+			local stroke = Textbox.Frame:FindFirstChildOfClass("UIStroke")
+			if stroke then
+				stroke.Thickness = 1.5
+				Creator.OverrideTag(stroke, { Color = "InputIndicatorFocus" })
+			end
+			
 			Textbox.Indicator.Size = UDim2.new(1, -2, 0, 2)
 			Textbox.Indicator.Position = UDim2.new(0, 1, 1, 0)
 			Textbox.Indicator.BackgroundTransparency = 0
@@ -2171,6 +2181,12 @@ Components.Textbox = (function()
 
 		Creator.AddSignal(Textbox.Input.FocusLost, function()
 			Update()
+			local stroke = Textbox.Frame:FindFirstChildOfClass("UIStroke")
+			if stroke then
+				stroke.Thickness = 1
+				Creator.OverrideTag(stroke, { Color = Acrylic and "InElementBorder" or "DialogButtonBorder" })
+			end
+			
 			Textbox.Indicator.Size = UDim2.new(1, -4, 0, 1)
 			Textbox.Indicator.Position = UDim2.new(0, 2, 1, 0)
 			Textbox.Indicator.BackgroundTransparency = 0.5
@@ -2273,10 +2289,9 @@ Components.TitleBar = (function()
                     TextColor3 = Color3.fromRGB(255, 255, 255)
 				}, {
 					New("UIGradient", {
-						Color = ColorSequence.new({
-							ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 180, 255)),
-							ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 90, 200))
-						}),
+						ThemeTag = {
+							Color = "Accent"
+						},
 						Rotation = 90
 					})
 				}),
@@ -2363,16 +2378,25 @@ Components.Window = (function()
 
 		local Selector = New("Frame", {
 			Size = UDim2.fromOffset(4, 0),
-			BackgroundColor3 = Color3.fromRGB(76, 194, 255),
 			Position = UDim2.fromOffset(0, 17 + 45),
 			AnchorPoint = Vector2.new(0, 0.5),
-			ThemeTag = {
-				BackgroundColor3 = "Accent",
-			},
+			BackgroundTransparency = 1
 		}, {
 			New("UICorner", {
-				CornerRadius = UDim.new(0, 2),
+				CornerRadius = UDim.new(0, 8)
 			}),
+			New("UIGradient", {
+				ThemeTag = {
+					Color = "Accent"
+				},
+				Rotation = 90
+			}),
+			New("UIStroke", {
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				Color = Color3.fromRGB(255, 255, 255),
+				Transparency = 0.85,
+				Thickness = 2
+			})
 		})
 
 		local ResizeStartFrame = New("Frame", {
@@ -2990,17 +3014,20 @@ ElementsTable.Toggle = (function()
 		})
 
 		local ToggleSlider = New("Frame", {
-			Size = UDim2.fromOffset(36, 18),
+			Size = UDim2.fromOffset(36, 20),
 			AnchorPoint = Vector2.new(1, 0.5),
 			Position = UDim2.new(1, -10, 0.5, 0),
 			Parent = ToggleFrame.Frame,
-			BackgroundTransparency = 1,
-			ThemeTag = {
-				BackgroundColor3 = "Accent",
-			},
+			BackgroundTransparency = 1
 		}, {
 			New("UICorner", {
-				CornerRadius = UDim.new(0, 9),
+				CornerRadius = UDim.new(1, 0),
+			}),
+			New("UIGradient", {
+				Enabled = false,
+				ThemeTag = {
+					Color = "Accent"
+				}
 			}),
 			ToggleBorder,
 			ToggleCircle,
@@ -3015,19 +3042,26 @@ ElementsTable.Toggle = (function()
 			Value = not not Value
 			Toggle.Value = Value
 
-			Creator.OverrideTag(ToggleBorder, { Color = Toggle.Value and "Accent" or "ToggleSlider" })
-			Creator.OverrideTag(ToggleCircle, { ImageColor3 = Toggle.Value and "ToggleToggled" or "ToggleSlider" })
+			local isToggled = Toggle.Value
+			local gradient = ToggleSlider:FindFirstChildOfClass("UIGradient")
+			
+			if isToggled then
+				Creator.OverrideTag(ToggleBorder, { Color = "AccentColor" })
+				gradient.Enabled = true
+			else
+				Creator.OverrideTag(ToggleBorder, { Color = "ToggleSlider" })
+				gradient.Enabled = false
+			end
+
+			Creator.OverrideTag(ToggleCircle, { ImageColor3 = isToggled and "ToggleToggled" or "ToggleSlider" })
 			TweenService:Create(
 				ToggleCircle,
 				TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-				{ Position = UDim2.new(0, Toggle.Value and 19 or 2, 0.5, 0) }
+				{ Position = UDim2.new(0, isToggled and 19 or 2, 0.5, 0) }
 			):Play()
-			TweenService:Create(
-				ToggleSlider,
-				TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-				{ BackgroundTransparency = Toggle.Value and 0.45 or 1 }
-			):Play()
-			ToggleCircle.ImageTransparency = Toggle.Value and 0 or 0.5
+
+			ToggleSlider.BackgroundColor3 = isToggled and Color3.new(1,1,1) or Creator.GetThemeProperty("ToggleSlider")
+			ToggleCircle.ImageTransparency = isToggled and 0 or 0.5
 
 			Library:SafeCallback(Toggle.Callback, Toggle.Value)
 			Library:SafeCallback(Toggle.Changed, Toggle.Value)
