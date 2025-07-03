@@ -3061,44 +3061,21 @@ Components.Window = (function()
 		})
 
 		local ResizeStartFrame = New("Frame", {
-			Size = UDim2.fromOffset(20, 20),
+			Size = UDim2.fromOffset(24, 24),
 			BackgroundTransparency = 1,
-			Position = UDim2.new(1, 8, 1, 8),
-			AnchorPoint = Vector2.new(1, 1),
+			Position = UDim2.new(1, 0, 1, 0),
+			AnchorPoint = Vector2.new(0.5, 0.5),
 			ZIndex = 99,
 		}, {
-			New("Frame", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = UDim2.fromScale(0.7, 0.3),
-				Size = UDim2.fromOffset(12, 2),
-				Rotation = -45,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 0.5,
-				BorderSizePixel = 0,
-			}, {
-				New("UICorner", { CornerRadius = UDim.new(1, 0) })
-			}),
-			New("Frame", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
+			New("ImageLabel", {
+				Image = "rbxassetid://9332463255",
+				ImageColor3 = Color3.fromRGB(255, 255, 255),
+				ImageTransparency = 0.5,
+				Rotation = 90,
+				Size = UDim2.fromScale(1, 1),
+				BackgroundTransparency = 1,
 				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromOffset(12, 2),
-				Rotation = -45,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 0.5,
-				BorderSizePixel = 0,
-			}, {
-				New("UICorner", { CornerRadius = UDim.new(1, 0) })
-			}),
-			New("Frame", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = UDim2.fromScale(0.3, 0.7),
-				Size = UDim2.fromOffset(12, 2),
-				Rotation = -45,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 0.5,
-				BorderSizePixel = 0,
-			}, {
-				New("UICorner", { CornerRadius = UDim.new(1, 0) })
 			})
 		})
 
@@ -3444,8 +3421,20 @@ Components.Window = (function()
 
 		Creator.AddSignal(UserInputService.InputChanged, function(Input)
 			if Input == DragInput and Dragging then
+				local viewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
+				local guiInset = GuiService:GetGuiInset()
+				local windowSize = Window.Root.AbsoluteSize
+				
 				local Delta = Input.Position - MousePos
-				Window.Position = UDim2.fromOffset(StartPos.X.Offset + Delta.X, StartPos.Y.Offset + Delta.Y)
+				
+				local newX = StartPos.X.Offset + Delta.X
+				local newY = StartPos.Y.Offset + Delta.Y
+
+				newX = math.clamp(newX, 0, viewportSize.X - windowSize.X)
+				newY = math.clamp(newY, guiInset.Y, viewportSize.Y - windowSize.Y)
+				
+				Window.Position = UDim2.fromOffset(newX, newY)
+
 				PosMotor:setGoal({
 					X = Instant(Window.Position.X.Offset),
 					Y = Instant(Window.Position.Y.Offset),
