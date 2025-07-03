@@ -3041,6 +3041,7 @@ Components.Window = (function()
 		local Dragging, DragInput, MousePos, StartPos = false
 		local Resizing, ResizePos, ResizeStartSize = false, nil, nil
 		local MinimizeNotif = false
+		local OldSize, OldPosition
 
 		Window.AcrylicPaint = Acrylic.AcrylicPaint()
 		Window.TabWidth = Config.TabWidth
@@ -3064,15 +3065,40 @@ Components.Window = (function()
 			BackgroundTransparency = 1,
 			Position = UDim2.new(1, 8, 1, 8),
 			AnchorPoint = Vector2.new(1, 1),
-			ZIndex = 2,
+			ZIndex = 99,
 		}, {
-			New("ImageLabel", {
-				Image = "rbxassetid://3926307971",
-				ImageColor3 = Color3.fromRGB(255, 255, 255),
-				ImageTransparency = 0.5,
-				Rotation = -90,
-				Size = UDim2.fromScale(1, 1),
-				BackgroundTransparency = 1,
+			New("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(0.7, 0.3),
+				Size = UDim2.fromOffset(12, 2),
+				Rotation = -45,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 0.5,
+				BorderSizePixel = 0,
+			}, {
+				New("UICorner", { CornerRadius = UDim.new(1, 0) })
+			}),
+			New("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(0.5, 0.5),
+				Size = UDim2.fromOffset(12, 2),
+				Rotation = -45,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 0.5,
+				BorderSizePixel = 0,
+			}, {
+				New("UICorner", { CornerRadius = UDim.new(1, 0) })
+			}),
+			New("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(0.3, 0.7),
+				Size = UDim2.fromOffset(12, 2),
+				Rotation = -45,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 0.5,
+				BorderSizePixel = 0,
+			}, {
+				New("UICorner", { CornerRadius = UDim.new(1, 0) })
 			})
 		})
 
@@ -3160,13 +3186,6 @@ Components.Window = (function()
 		SearchTextbox.Frame.Position = UDim2.new(0, 8, 0, 4)
 		SearchTextbox.Input.PlaceholderText = "Search..."
 		SearchTextbox.Input.Text = ""
-
-
-
-
-
-
-
 
 		local SearchIcon = New("ImageLabel", {
 			Size = UDim2.fromOffset(18, 18),
@@ -3256,6 +3275,7 @@ Components.Window = (function()
 			Size = Window.Size,
 			Position = Window.Position,
 			Parent = Config.Parent,
+			ClipsDescendants = false,
 		}, {
 			Window.AcrylicPaint.Frame,
 			Window.TabDisplay,
@@ -3328,7 +3348,6 @@ Components.Window = (function()
 		end)
 
 		local GuiService = game:GetService("GuiService")
-		local OldSize, OldPosition
 
 		Window.Maximize = function(Value, NoPos, Instant)
 			Window.Maximized = Value
@@ -3386,10 +3405,12 @@ Components.Window = (function()
 				MousePos = Input.Position
 				StartPos = Window.Root.Position
 
-				if Window.Maximized then
+				if Window.Maximized and OldSize then
+					local oldSizeX = OldSize.X.Offset
+					local oldSizeY = OldSize.Y.Offset
 					StartPos = UDim2.fromOffset(
-						Mouse.X - (Mouse.X * ((OldSizeX - 100) / Window.Root.AbsoluteSize.X)),
-						Mouse.Y - (Mouse.Y * (OldSizeY / Window.Root.AbsoluteSize.Y))
+						Mouse.X - (Mouse.X * ((oldSizeX - 100) / Window.Root.AbsoluteSize.X)),
+						Mouse.Y - (Mouse.Y * (oldSizeY / Window.Root.AbsoluteSize.Y))
 					)
 				end
 
@@ -3421,7 +3442,7 @@ Components.Window = (function()
 			end
 		end)
 
-    Creator.AddSignal(UserInputService.InputChanged, function(Input)
+		Creator.AddSignal(UserInputService.InputChanged, function(Input)
 			if Input == DragInput and Dragging then
 				local Delta = Input.Position - MousePos
 				Window.Position = UDim2.fromOffset(StartPos.X.Offset + Delta.X, StartPos.Y.Offset + Delta.Y)
