@@ -623,7 +623,7 @@ local Creator = {
 }
 
 local function ApplyCustomProps(Object, Props)
-	if Props.ThemeTag then
+	if Props and Props.ThemeTag then
 		Creator.AddThemeObject(Object, Props.ThemeTag)
 	end
 end
