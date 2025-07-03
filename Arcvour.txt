@@ -3063,6 +3063,17 @@ Components.Window = (function()
 			Size = UDim2.fromOffset(20, 20),
 			BackgroundTransparency = 1,
 			Position = UDim2.new(1, -20, 1, -20),
+		}, {
+			New("ImageLabel", {
+				Image = "rbxassetid://3926307971",
+				ImageColor3 = Color3.fromRGB(255, 255, 255),
+				ImageTransparency = 0.6,
+				Rotation = -90,
+				Size = UDim2.fromOffset(20, 20),
+				AnchorPoint = Vector2.new(1, 1),
+				Position = UDim2.fromScale(1, 1),
+				BackgroundTransparency = 1,
+			})
 		})
 
 		Window.TabHolder = New("ScrollingFrame", {
@@ -3150,13 +3161,6 @@ Components.Window = (function()
 		SearchTextbox.Input.PlaceholderText = "Search..."
 		SearchTextbox.Input.Text = ""
 
-
-
-
-
-
-
-
 		local SearchIcon = New("ImageLabel", {
 			Size = UDim2.fromOffset(18, 18),
 			Position = UDim2.new(1, -18, 0.5, 0),
@@ -3169,12 +3173,10 @@ Components.Window = (function()
 			},
 		})
 
-
 		Creator.AddSignal(SearchTextbox.Input:GetPropertyChangedSignal("Text"), function()
 			local searchText = SearchTextbox.Input.Text
 			UpdateElementVisibility(searchText)
 		end)
-
 
 		Creator.AddSignal(SearchTextbox.Input.FocusLost, function(enterPressed)
 		end)
@@ -3187,7 +3189,6 @@ Components.Window = (function()
 				SearchTextbox.Input:ReleaseFocus()
 			end
 		end)
-
 
 		Window.SearchElements = SearchElements
 		Window.AllElements = AllElements
@@ -3427,16 +3428,27 @@ Components.Window = (function()
 				(Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)
 				and Resizing
 			then
+				local viewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
+				local minSize = Vector2.new(470, 380)
+		
+				local windowPos = Window.Root.AbsolutePosition
+				
 				local Delta = Input.Position - ResizePos
-				local StartSize = Window.Size
-
-				local TargetSize = Vector3.new(StartSize.X.Offset, StartSize.Y.Offset, 0) + Vector3.new(1, 1, 0) * Delta
-				local TargetSizeClamped =
-					Vector2.new(math.clamp(TargetSize.X, 470, 2048), math.clamp(TargetSize.Y, 380, 2048))
-
+				local newWidth = Window.Size.X.Offset + Delta.X
+				local newHeight = Window.Size.Y.Offset + Delta.Y
+		
+				newWidth = math.max(newWidth, minSize.X)
+				newHeight = math.max(newHeight, minSize.Y)
+		
+				local maxWidth = viewportSize.X - windowPos.X
+				local maxHeight = viewportSize.Y - windowPos.Y
+		
+				newWidth = math.min(newWidth, maxWidth)
+				newHeight = math.min(newHeight, maxHeight)
+				
 				SizeMotor:setGoal({
-					X = Flipper.Instant.new(TargetSizeClamped.X),
-					Y = Flipper.Instant.new(TargetSizeClamped.Y),
+					X = Flipper.Instant.new(newWidth),
+					Y = Flipper.Instant.new(newHeight),
 				})
 			end
 		end)
