@@ -3339,7 +3339,7 @@ Components.Window = (function()
 				local margin = 10 
 
 				local targetSizeX = viewportSize.X - (margin * 2)
-				local targetSizeY = viewportSize.Y - (margin * 2)
+				local targetSizeY = viewportSize.Y - inset.Y - (margin * 2)
 				local targetPosX = margin
 				local targetPosY = inset.Y + margin
 				
@@ -3431,7 +3431,7 @@ Components.Window = (function()
 				local newY = StartPos.Y.Offset + Delta.Y
 
 				newX = math.clamp(newX, 0, viewportSize.X - windowSize.X)
-				newY = math.clamp(newY, guiInset.Y, (viewportSize.Y + guiInset.Y) - windowSize.Y)
+				newY = math.clamp(newY, guiInset.Y, viewportSize.Y - windowSize.Y)
 				
 				Window.Position = UDim2.fromOffset(newX, newY)
 
