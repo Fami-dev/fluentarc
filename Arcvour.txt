@@ -3039,7 +3039,7 @@ Components.Window = (function()
 		}
 
 		local Dragging, DragInput, MousePos, StartPos = false
-		local Resizing, ResizePos = false
+		local Resizing, ResizePos, ResizeStartSize = false, nil, nil
 		local MinimizeNotif = false
 
 		Window.AcrylicPaint = Acrylic.AcrylicPaint()
@@ -3062,16 +3062,16 @@ Components.Window = (function()
 		local ResizeStartFrame = New("Frame", {
 			Size = UDim2.fromOffset(20, 20),
 			BackgroundTransparency = 1,
-			Position = UDim2.new(1, -20, 1, -20),
+			Position = UDim2.new(1, 0, 1, 0),
+			AnchorPoint = Vector2.new(1, 1),
+			ZIndex = 2,
 		}, {
 			New("ImageLabel", {
 				Image = "rbxassetid://3926307971",
 				ImageColor3 = Color3.fromRGB(255, 255, 255),
 				ImageTransparency = 0.6,
 				Rotation = -90,
-				Size = UDim2.fromOffset(20, 20),
-				AnchorPoint = Vector2.new(1, 1),
-				Position = UDim2.fromScale(1, 1),
+				Size = UDim2.fromScale(1, 1),
 				BackgroundTransparency = 1,
 			})
 		})
@@ -3161,6 +3161,13 @@ Components.Window = (function()
 		SearchTextbox.Input.PlaceholderText = "Search..."
 		SearchTextbox.Input.Text = ""
 
+
+
+
+
+
+
+
 		local SearchIcon = New("ImageLabel", {
 			Size = UDim2.fromOffset(18, 18),
 			Position = UDim2.new(1, -18, 0.5, 0),
@@ -3173,10 +3180,12 @@ Components.Window = (function()
 			},
 		})
 
+
 		Creator.AddSignal(SearchTextbox.Input:GetPropertyChangedSignal("Text"), function()
 			local searchText = SearchTextbox.Input.Text
 			UpdateElementVisibility(searchText)
 		end)
+
 
 		Creator.AddSignal(SearchTextbox.Input.FocusLost, function(enterPressed)
 		end)
@@ -3189,6 +3198,7 @@ Components.Window = (function()
 				SearchTextbox.Input:ReleaseFocus()
 			end
 		end)
+
 
 		Window.SearchElements = SearchElements
 		Window.AllElements = AllElements
@@ -3407,6 +3417,7 @@ Components.Window = (function()
 			then
 				Resizing = true
 				ResizePos = Input.Position
+				ResizeStartSize = Window.Root.AbsoluteSize
 			end
 		end)
 
@@ -3426,29 +3437,28 @@ Components.Window = (function()
 
 			if
 				(Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)
-				and Resizing
+				and Resizing and ResizeStartSize
 			then
-				local viewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
-				local minSize = Vector2.new(470, 380)
-		
-				local windowPos = Window.Root.AbsolutePosition
-				
+				local ViewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
+				local Margin = 10
+				local WindowPos = Window.Root.AbsolutePosition
+				local MinSize = Vector2.new(470, 380)
 				local Delta = Input.Position - ResizePos
-				local newWidth = Window.Size.X.Offset + Delta.X
-				local newHeight = Window.Size.Y.Offset + Delta.Y
-		
-				newWidth = math.max(newWidth, minSize.X)
-				newHeight = math.max(newHeight, minSize.Y)
-		
-				local maxWidth = viewportSize.X - windowPos.X
-				local maxHeight = viewportSize.Y - windowPos.Y
-		
-				newWidth = math.min(newWidth, maxWidth)
-				newHeight = math.min(newHeight, maxHeight)
+				local NewSizeX = ResizeStartSize.X + Delta.X
+				local NewSizeY = ResizeStartSize.Y + Delta.Y
+				
+				NewSizeX = math.max(NewSizeX, MinSize.X)
+				NewSizeY = math.max(NewSizeY, MinSize.Y)
+				
+				local MaxWidth = ViewportSize.X - WindowPos.X - Margin
+				local MaxHeight = ViewportSize.Y - WindowPos.Y - Margin
+				
+				NewSizeX = math.min(NewSizeX, MaxWidth)
+				NewSizeY = math.min(NewSizeY, MaxHeight)
 				
 				SizeMotor:setGoal({
-					X = Flipper.Instant.new(newWidth),
-					Y = Flipper.Instant.new(newHeight),
+					X = Flipper.Instant.new(NewSizeX),
+					Y = Flipper.Instant.new(NewSizeY),
 				})
 			end
 		end)
@@ -3456,6 +3466,7 @@ Components.Window = (function()
 		Creator.AddSignal(UserInputService.InputEnded, function(Input)
 			if Resizing == true or Input.UserInputType == Enum.UserInputType.Touch then
 				Resizing = false
+				ResizeStartSize = nil
 				Window.Size = UDim2.fromOffset(SizeMotor:getValue().X, SizeMotor:getValue().Y)
 			end
 		end)
