@@ -3336,9 +3336,10 @@ Components.Window = (function()
 
 				local inset = GuiService:GetGuiInset()
 				local viewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
+				local margin = 10
 
 				local targetSizeX = viewportSize.X
-				local targetSizeY = viewportSize.Y - inset.Y
+				local targetSizeY = viewportSize.Y - inset.Y - margin
 				local targetPosX = 0
 				local targetPosY = inset.Y
 				
@@ -3430,7 +3431,7 @@ Components.Window = (function()
 				local newY = StartPos.Y.Offset + Delta.Y
 
 				newX = math.clamp(newX, 0, viewportSize.X - windowSize.X)
-				newY = math.clamp(newY, inset.Y, viewportSize.Y - windowSize.Y)
+				newY = math.clamp(newY, inset.Y, viewportSize.Y - windowSize.Y - 10)
 				
 				Window.Position = UDim2.fromOffset(newX, newY)
 
