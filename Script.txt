@@ -1,13 +1,5 @@
---[[
-    Skrip 'Climb and Jump Tower' dikonversi ke Fluent UI.
-    - Memperbaiki error "attempt to index nil with 'Value'".
-    - Mengatur ulang urutan inisialisasi elemen dan callback.
-]]
-
--- 1. Inisialisasi Library Fluent
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Fami-dev/fluentarc/refs/heads/main/Arcvour.txt"))()
 
--- 2. Membuat Window Utama
 local Window = Fluent:CreateWindow({
     Title = "Arcvour Script (CLIMB AND JUMP TOWER)",
     SubTitle = "Converted to Fluent",
@@ -18,7 +10,6 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.K
 })
 
--- 3. Membuat Tab
 local Tabs = {
     Farming = Window:AddTab({ Title = "Farming", Icon = "dollar-sign" }),
     Hatching = Window:AddTab({ Title = "Hatching", Icon = "egg" }),
@@ -26,15 +17,9 @@ local Tabs = {
     Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" })
 }
 
--- Akses mudah ke semua opsi yang dibuat
 local Options = Fluent.Options
 local player = game.Players.LocalPlayer
 
--- =================================================================
--- Farming Tab
--- =================================================================
-
--- Variabel dan Fungsi untuk Farming
 local coinAmount = nil
 local selectedMap = "Eiffel Tower"
 local isWinLoopRunning = false
@@ -52,7 +37,6 @@ local towerCoordinates = {
 local orderedTowerNames = {"Eiffel Tower", "Empire State Building", "Oriental Pearl Tower", "Big Ben", "Obelisk", "Leaning Tower", "Burj Khalifa Tower", "Pixel World", "Tokyo Tower"}
 
 
--- Bagian Auto Farm Coins
 do
     local Section = Tabs.Farming:AddSection("Auto Farm Coins")
     Section:AddParagraph({Title = "Note", Content = "Enter the height as a number. The higher the number, the slower it will be. Buy better wings to go faster."})
@@ -90,9 +74,7 @@ do
     end)
 end
 
--- ================== BAGIAN YANG DIPERBAIKI ==================
 local function ManageWinLoop()
-    -- Pastikan semua elemen sudah ada sebelum melanjutkan
     if not (Options.AutoWins and Options.AutoMagic and Options.AutoCoins and Options.TeleportMode) then
         return
     end
@@ -156,7 +138,6 @@ do
     local Section = Tabs.Farming:AddSection("Auto Farm Wins & Magic Token")
     Section:AddParagraph({Title = "Note", Content = "You must have Auto Coins enabled. If you are not using Teleport Mode, you must be at the top of the tower. If you enable Teleport Mode, you can be anywhere as long as you have selected a map."})
     
-    -- Langkah 1: Buat semua elemen UI terlebih dahulu TANPA callback
     Options.AutoWins = Section:AddToggle("AutoWins", { Title = "Auto Wins", Default = false })
     Options.AutoMagic = Section:AddToggle("AutoMagic", { Title = "Auto Magic Token", Default = false })
     
@@ -171,7 +152,6 @@ do
     
     Options.TeleportMode = Section:AddToggle("TeleportMode", { Title = "Enable Teleport Mode", Default = false })
 
-    -- Langkah 2: Setelah semua elemen dibuat, hubungkan fungsi ke event OnChanged
     Options.AutoWins:OnChanged(ManageWinLoop)
     Options.AutoMagic:OnChanged(ManageWinLoop)
     Options.TeleportMode:OnChanged(function(value)
@@ -181,11 +161,7 @@ do
         ManageWinLoop()
     end)
 end
--- ================== AKHIR BAGIAN YANG DIPERBAIKI ==================
 
--- =================================================================
--- Hatching Tab
--- =================================================================
 do
     local Section = Tabs.Hatching:AddSection("Auto Hatch Eggs")
 
@@ -219,9 +195,6 @@ do
     end)
 end
 
--- =================================================================
--- Movement Tab
--- =================================================================
 do
     local ClimbSection = Tabs.Movement:AddSection("Climb Settings")
     ClimbSection:AddToggle("AutoClimb", {
@@ -241,7 +214,6 @@ do
 
     local ExploitSection = Tabs.Movement:AddSection("Movement Exploits")
     
-    -- WalkSpeed
     Options.WalkSpeedToggle = ExploitSection:AddToggle("WalkSpeedToggle", { Title = "Enable WalkSpeed", Default = false })
     Options.WalkSpeedSlider = ExploitSection:AddSlider("WalkSpeedSlider", { Title = "WalkSpeed Value", Min = 16, Max = 200, Default = 100, Rounding = 0 })
 
@@ -256,7 +228,6 @@ do
         end
     end)
 
-    -- Infinite Jump
     Options.InfJumpToggle = ExploitSection:AddToggle("InfJumpToggle", { Title = "Enable Infinite Jump", Default = false })
     game:GetService("UserInputService").JumpRequest:Connect(function()
         if Options.InfJumpToggle.Value and player.Character and player.Character:FindFirstChild("Humanoid") then
@@ -264,7 +235,6 @@ do
         end
     end)
 
-    -- NoClip
     Options.NoClipToggle = ExploitSection:AddToggle("NoClipToggle", { Title = "Enable No Clip", Default = false })
     Options.NoClipToggle:OnChanged(function(state)
         if not state and player.Character then
@@ -286,7 +256,6 @@ do
         end
     end)
 
-    -- Character Respawn Handler
     player.CharacterAdded:Connect(function(character)
         local humanoid = character:WaitForChild("Humanoid")
         if Options.WalkSpeedToggle and Options.WalkSpeedToggle.Value then
@@ -295,9 +264,6 @@ do
     end)
 end
 
--- =================================================================
--- Visuals Tab
--- =================================================================
 do
     local Section = Tabs.Visuals:AddSection("Display Settings")
     Section:AddToggle("HidePets", {
@@ -316,14 +282,8 @@ do
     })
 end
 
--- =================================================================
--- Finalisasi
--- =================================================================
-
--- Pilih tab pertama untuk ditampilkan secara default
 Window:SelectTab(1)
 
--- Beri notifikasi bahwa skrip sudah siap
 Fluent:Notify({
     Title = "Arcvour Script Ready",
     Content = "All features have been loaded using Fluent.",
