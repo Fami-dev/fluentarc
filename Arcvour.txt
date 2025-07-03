@@ -3062,14 +3062,14 @@ Components.Window = (function()
 		local ResizeStartFrame = New("Frame", {
 			Size = UDim2.fromOffset(20, 20),
 			BackgroundTransparency = 1,
-			Position = UDim2.new(1, 0, 1, 0),
+			Position = UDim2.new(1, 8, 1, 8),
 			AnchorPoint = Vector2.new(1, 1),
 			ZIndex = 2,
 		}, {
 			New("ImageLabel", {
 				Image = "rbxassetid://3926307971",
 				ImageColor3 = Color3.fromRGB(255, 255, 255),
-				ImageTransparency = 0.6,
+				ImageTransparency = 0.5,
 				Rotation = -90,
 				Size = UDim2.fromScale(1, 1),
 				BackgroundTransparency = 1,
@@ -3421,7 +3421,7 @@ Components.Window = (function()
 			end
 		end)
 
-		Creator.AddSignal(UserInputService.InputChanged, function(Input)
+    Creator.AddSignal(UserInputService.InputChanged, function(Input)
 			if Input == DragInput and Dragging then
 				local Delta = Input.Position - MousePos
 				Window.Position = UDim2.fromOffset(StartPos.X.Offset + Delta.X, StartPos.Y.Offset + Delta.Y)
