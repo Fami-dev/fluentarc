@@ -1,0 +1,331 @@
+--[[
+    Skrip 'Climb and Jump Tower' dikonversi ke Fluent UI.
+    - Memperbaiki error "attempt to index nil with 'Value'".
+    - Mengatur ulang urutan inisialisasi elemen dan callback.
+]]
+
+-- 1. Inisialisasi Library Fluent
+local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Fami-dev/fluentarc/refs/heads/main/Arcvour.txt"))()
+
+-- 2. Membuat Window Utama
+local Window = Fluent:CreateWindow({
+    Title = "Arcvour Script (CLIMB AND JUMP TOWER)",
+    SubTitle = "Converted to Fluent",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(500, 300),
+    Acrylic = true,
+    Theme = "Amethyst",
+    MinimizeKey = Enum.KeyCode.K
+})
+
+-- 3. Membuat Tab
+local Tabs = {
+    Farming = Window:AddTab({ Title = "Farming", Icon = "dollar-sign" }),
+    Hatching = Window:AddTab({ Title = "Hatching", Icon = "egg" }),
+    Movement = Window:AddTab({ Title = "Movement", Icon = "footprints" }),
+    Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" })
+}
+
+-- Akses mudah ke semua opsi yang dibuat
+local Options = Fluent.Options
+local player = game.Players.LocalPlayer
+
+-- =================================================================
+-- Farming Tab
+-- =================================================================
+
+-- Variabel dan Fungsi untuk Farming
+local coinAmount = nil
+local selectedMap = "Eiffel Tower"
+local isWinLoopRunning = false
+local towerCoordinates = {
+    ["Eiffel Tower"] = Vector3.new(-4.5, 14406, -86.5),
+    ["Empire State Building"] = Vector3.new(5000, 14408.5, -78),
+    ["Oriental Pearl Tower"] = Vector3.new(10001, 14408, -58),
+    ["Big Ben"] = Vector3.new(14997, 14408.5, -157),
+    ["Obelisk"] = Vector3.new(20001, 14408, -108.5),
+    ["Leaning Tower"] = Vector3.new(25000, 14010, -60.5),
+    ["Burj Khalifa Tower"] = Vector3.new(30001, 14407, -107),
+    ["Pixel World"] = Vector3.new(35000, 14409, -64),
+    ["Tokyo Tower"] = Vector3.new(39999, 14407, -192)
+}
+local orderedTowerNames = {"Eiffel Tower", "Empire State Building", "Oriental Pearl Tower", "Big Ben", "Obelisk", "Leaning Tower", "Burj Khalifa Tower", "Pixel World", "Tokyo Tower"}
+
+
+-- Bagian Auto Farm Coins
+do
+    local Section = Tabs.Farming:AddSection("Auto Farm Coins")
+    Section:AddParagraph({Title = "Note", Content = "Enter the height as a number. The higher the number, the slower it will be. Buy better wings to go faster."})
+    
+    Section:AddInput("CoinHeight", {
+        Title = "Height Amount",
+        Placeholder = "e.g. 14400",
+        Numeric = true,
+        Callback = function(text)
+            local num = tonumber(text)
+            coinAmount = (num and num > 0) and num or nil
+        end
+    })
+
+    Options.AutoCoins = Section:AddToggle("AutoCoins", { Title = "Auto Coins", Default = false })
+    Options.AutoCoins:OnChanged(function(value)
+        if value then
+            if not coinAmount or type(coinAmount) ~= "number" or coinAmount <= 0 then
+                Fluent:Notify({Title = "Action Required", Content = "Please enter a valid height amount before starting.", Duration = 6})
+                Options.AutoCoins:SetValue(false)
+                return
+            end
+
+            Fluent:Notify({Title = "Success", Content = "Auto Coins farming has started.", Duration = 5})
+            task.spawn(function()
+                while Options.AutoCoins.Value do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Msg.RemoteEvent:FireServer("\232\181\183\232\183\179", coinAmount)
+                        game:GetService("ReplicatedStorage").Msg.RemoteEvent:FireServer("\232\144\189\229\156\176")
+                    end)
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end)
+end
+
+-- ================== BAGIAN YANG DIPERBAIKI ==================
+local function ManageWinLoop()
+    -- Pastikan semua elemen sudah ada sebelum melanjutkan
+    if not (Options.AutoWins and Options.AutoMagic and Options.AutoCoins and Options.TeleportMode) then
+        return
+    end
+
+    local shouldRun = Options.AutoWins.Value or Options.AutoMagic.Value
+
+    if shouldRun and not Options.AutoCoins.Value then
+        Fluent:Notify({Title = "Prerequisite Missing", Content = "You must enable 'Auto Coins' before farming Wins or Magic Tokens.", Duration = 7})
+        Options.AutoWins:SetValue(false)
+        Options.AutoMagic:SetValue(false)
+        return
+    end
+
+    if shouldRun and not isWinLoopRunning then
+        isWinLoopRunning = true
+        local interval = Options.TeleportMode.Value and "12.6s" or "13s"
+        Fluent:Notify({Title = "Success", Content = "Win/Magic Token farming loop has started. Interval: " .. interval, Duration = 5})
+
+        task.spawn(function()
+            while isWinLoopRunning do
+                if not (Options.AutoWins and Options.AutoWins.Value or Options.AutoMagic and Options.AutoMagic.Value) then
+                    isWinLoopRunning = false
+                    break
+                end
+
+                pcall(function()
+                    if Options.TeleportMode.Value and player.Character and player.Character.HumanoidRootPart then
+                        local originalCFrame = player.Character.HumanoidRootPart.CFrame
+                        local returnCFrame = CFrame.new(originalCFrame.X, originalCFrame.Y + 5, originalCFrame.Z)
+                        
+                        if towerCoordinates[selectedMap] then
+                            player.Character.HumanoidRootPart.CFrame = CFrame.new(towerCoordinates[selectedMap])
+                        end
+                        task.wait(0.5)
+                        
+                        if Options.AutoWins.Value then game:GetService("ReplicatedStorage").Msg.RemoteEvent:FireServer("\233\162\134\229\143\150\230\165\188\233\161\182wins") end
+                        if Options.AutoMagic.Value then game:GetService("ReplicatedStorage").Msg.RemoteEvent:FireServer("\233\162\134\229\143\150\230\165\188\233\161\182MagicToken") end
+                        task.wait(0.5)
+
+                        if towerCoordinates[selectedMap] then
+                            local targetCoords = towerCoordinates[selectedMap]
+                            player.Character.HumanoidRootPart.CFrame = CFrame.new(targetCoords.X, targetCoords.Y, 0)
+                        end
+                        task.wait(0.1)
+                        player.Character.HumanoidRootPart.CFrame = returnCFrame
+                        task.wait(11.5)
+                    else
+                        if Options.AutoWins.Value then game:GetService("ReplicatedStorage").Msg.RemoteEvent:FireServer("\233\162\134\229\143\150\230\165\188\233\161\182wins") end
+                        if Options.AutoMagic.Value then game:GetService("ReplicatedStorage").Msg.RemoteEvent:FireServer("\233\162\134\229\143\150\230\165\188\233\161\182MagicToken") end
+                        task.wait(13)
+                    end
+                end)
+            end
+        end)
+    elseif not shouldRun then
+        isWinLoopRunning = false
+    end
+end
+
+do
+    local Section = Tabs.Farming:AddSection("Auto Farm Wins & Magic Token")
+    Section:AddParagraph({Title = "Note", Content = "You must have Auto Coins enabled. If you are not using Teleport Mode, you must be at the top of the tower. If you enable Teleport Mode, you can be anywhere as long as you have selected a map."})
+    
+    -- Langkah 1: Buat semua elemen UI terlebih dahulu TANPA callback
+    Options.AutoWins = Section:AddToggle("AutoWins", { Title = "Auto Wins", Default = false })
+    Options.AutoMagic = Section:AddToggle("AutoMagic", { Title = "Auto Magic Token", Default = false })
+    
+    Section:AddDropdown("SelectTower", {
+        Title = "Select Tower",
+        Values = orderedTowerNames,
+        Default = "Eiffel Tower",
+        Callback = function(towerName)
+            selectedMap = towerName
+        end
+    })
+    
+    Options.TeleportMode = Section:AddToggle("TeleportMode", { Title = "Enable Teleport Mode", Default = false })
+
+    -- Langkah 2: Setelah semua elemen dibuat, hubungkan fungsi ke event OnChanged
+    Options.AutoWins:OnChanged(ManageWinLoop)
+    Options.AutoMagic:OnChanged(ManageWinLoop)
+    Options.TeleportMode:OnChanged(function(value)
+        if value then 
+            Fluent:Notify({Title = "Reminder", Content = "Teleport Mode activated. Please ensure you have selected the correct tower.", Duration = 6})
+        end
+        ManageWinLoop()
+    end)
+end
+-- ================== AKHIR BAGIAN YANG DIPERBAIKI ==================
+
+-- =================================================================
+-- Hatching Tab
+-- =================================================================
+do
+    local Section = Tabs.Hatching:AddSection("Auto Hatch Eggs")
+
+    local orderedEggNames = {"Egg 1 (Eiffel Tower)", "Egg 2 (Eiffel Tower)", "Egg 3 (Eiffel Tower)","Egg 1 (Empire State Bulding)", "Egg 2 (Empire State Bulding)", "Egg 3 (Empire State Bulding)","Egg 1 (Oriental Pearl Tower)", "Egg 2 (Oriental Pearl Tower)","Egg 1 (Big Ben)", "Egg 2 (Big Ben)","Egg 1 (Obelisk)", "Egg 2 (Obelisk)","Egg 1 (Leaning Tower)", "Egg 2 (Leaning Tower)","Egg 1 (Burj Khalifa Tower)", "Egg 2 (Burj Khalifa Tower)", "Egg 3 (Burj Khalifa Tower)","Egg 1 (Pixel World)", "Egg 2 (Pixel World)", "Egg 3 (Pixel World)","Egg 1 (Tokyo Tower)", "Egg 2 (Tokyo Tower)", "Egg 3 (Tokyo Tower)"}
+    local eggLookupTable = {["Egg 1 (Eiffel Tower)"]=7000001,["Egg 2 (Eiffel Tower)"]=7000002,["Egg 3 (Eiffel Tower)"]=7000003,["Egg 1 (Empire State Bulding)"]=7000004,["Egg 2 (Empire State Bulding)"]=7000005,["Egg 3 (Empire State Bulding)"]=7000006,["Egg 1 (Oriental Pearl Tower)"]=7000007,["Egg 2 (Oriental Pearl Tower)"]=7000008,["Egg 1 (Big Ben)"]=7000009,["Egg 2 (Big Ben)"]=7000010,["Egg 1 (Obelisk)"]=7000011,["Egg 2 (Obelisk)"]=7000012,["Egg 1 (Leaning Tower)"]=7000013,["Egg 2 (Leaning Tower)"]=7000014,["Egg 1 (Burj Khalifa Tower)"]=7000015,["Egg 2 (Burj Khalifa Tower)"]=7000016,["Egg 3 (Burj Khalifa Tower)"]=7000017,["Egg 1 (Pixel World)"]=7000018,["Egg 2 (Pixel World)"]=7000019,["Egg 3 (Pixel World)"]=7000020,["Egg 1 (Tokyo Tower)"]=7000021,["Egg 2 (Tokyo Tower)"]=7000022,["Egg 3 (Tokyo Tower)"]=7000023}
+    local selectedEggID = eggLookupTable[orderedEggNames[1]]
+
+    Section:AddDropdown("SelectEgg", {
+        Title = "Select Egg",
+        Values = orderedEggNames,
+        Default = orderedEggNames[1],
+        Callback = function(selectedEggName)
+            selectedEggID = eggLookupTable[selectedEggName]
+        end
+    })
+
+    Options.AutoHatch = Section:AddToggle("AutoHatch", { Title = "Auto Hatch", Default = false })
+    Options.AutoHatch:OnChanged(function(value)
+        if value then
+            Fluent:Notify({Title = "Success", Content = "Auto Hatching has started.", Duration = 5})
+            task.spawn(function()
+                while Options.AutoHatch.Value do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Msg.RemoteEvent:FireServer("\230\138\189\232\155\139\229\188\149\229\175\188\231\187\147\230\157\159")
+                        game:GetService("ReplicatedStorage").Tool.DrawUp.Msg.DrawHero:InvokeServer(selectedEggID, 1)
+                    end)
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end)
+end
+
+-- =================================================================
+-- Movement Tab
+-- =================================================================
+do
+    local ClimbSection = Tabs.Movement:AddSection("Climb Settings")
+    ClimbSection:AddToggle("AutoClimb", {
+        Title = "Auto Climb",
+        Default = false,
+        Callback = function(state)
+            player.Setting.isAutoOn.Value = state and 1 or 0
+        end
+    })
+    ClimbSection:AddToggle("SuperClimb", {
+        Title = "Auto Super Climb",
+        Default = false,
+        Callback = function(state)
+            player.Setting.isAutoCllect.Value = state and 1 or 0
+        end
+    })
+
+    local ExploitSection = Tabs.Movement:AddSection("Movement Exploits")
+    
+    -- WalkSpeed
+    Options.WalkSpeedToggle = ExploitSection:AddToggle("WalkSpeedToggle", { Title = "Enable WalkSpeed", Default = false })
+    Options.WalkSpeedSlider = ExploitSection:AddSlider("WalkSpeedSlider", { Title = "WalkSpeed Value", Min = 16, Max = 200, Default = 100, Rounding = 0 })
+
+    Options.WalkSpeedToggle:OnChanged(function(state)
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = state and Options.WalkSpeedSlider.Value or 16
+        end
+    end)
+    Options.WalkSpeedSlider:OnChanged(function(value)
+        if Options.WalkSpeedToggle.Value and player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = value
+        end
+    end)
+
+    -- Infinite Jump
+    Options.InfJumpToggle = ExploitSection:AddToggle("InfJumpToggle", { Title = "Enable Infinite Jump", Default = false })
+    game:GetService("UserInputService").JumpRequest:Connect(function()
+        if Options.InfJumpToggle.Value and player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end)
+
+    -- NoClip
+    Options.NoClipToggle = ExploitSection:AddToggle("NoClipToggle", { Title = "Enable No Clip", Default = false })
+    Options.NoClipToggle:OnChanged(function(state)
+        if not state and player.Character then
+            for _, part in ipairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = true end
+            end
+        end
+    end)
+    task.spawn(function()
+        while task.wait(0.1) do
+            if Fluent.Unloaded then break end
+            if Options.NoClipToggle and Options.NoClipToggle.Value and player.Character then
+                for _, part in ipairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") and part.CanCollide then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end
+    end)
+
+    -- Character Respawn Handler
+    player.CharacterAdded:Connect(function(character)
+        local humanoid = character:WaitForChild("Humanoid")
+        if Options.WalkSpeedToggle and Options.WalkSpeedToggle.Value then
+            humanoid.WalkSpeed = Options.WalkSpeedSlider.Value
+        end
+    end)
+end
+
+-- =================================================================
+-- Visuals Tab
+-- =================================================================
+do
+    local Section = Tabs.Visuals:AddSection("Display Settings")
+    Section:AddToggle("HidePets", {
+        Title = "Hide Pets",
+        Default = false,
+        Callback = function(state)
+            player.Setting.ShowPets.Value = state and 0 or 1
+        end
+    })
+    Section:AddToggle("HideJumpPals", {
+        Title = "Hide JumpPals",
+        Default = false,
+        Callback = function(state)
+            player.Setting.ShowJumpPal.Value = state and 0 or 1
+        end
+    })
+end
+
+-- =================================================================
+-- Finalisasi
+-- =================================================================
+
+-- Pilih tab pertama untuk ditampilkan secara default
+Window:SelectTab(1)
+
+-- Beri notifikasi bahwa skrip sudah siap
+Fluent:Notify({
+    Title = "Arcvour Script Ready",
+    Content = "All features have been loaded using Fluent.",
+    Duration = 8
+})
