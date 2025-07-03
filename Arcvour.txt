@@ -3422,7 +3422,6 @@ Components.Window = (function()
 		Creator.AddSignal(UserInputService.InputChanged, function(Input)
 			if Input == DragInput and Dragging then
 				local viewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
-				local guiInset = GuiService:GetGuiInset()
 				local windowSize = Window.Root.AbsoluteSize
 				
 				local Delta = Input.Position - MousePos
@@ -3431,7 +3430,7 @@ Components.Window = (function()
 				local newY = StartPos.Y.Offset + Delta.Y
 
 				newX = math.clamp(newX, 0, viewportSize.X - windowSize.X)
-				newY = math.clamp(newY, guiInset.Y, viewportSize.Y - windowSize.Y)
+				newY = math.clamp(newY, 0, viewportSize.Y - windowSize.Y)
 				
 				Window.Position = UDim2.fromOffset(newX, newY)
 
