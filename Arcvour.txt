@@ -57,43 +57,43 @@ local Themes = {
 	Arcvour = {
 		Name = "Arcvour",
 		Accent = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(160, 145, 212)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 130, 180))
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(140, 70, 255)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 120, 255))
 		}),
-		AccentColor = Color3.fromRGB(160, 145, 212),
-		AcrylicMain = Color3.fromRGB(33, 29, 53),
-		AcrylicBorder = Color3.fromRGB(74, 69, 104),
-		AcrylicGradient = ColorSequence.new(Color3.fromRGB(44, 40, 68), Color3.fromRGB(33, 29, 53)),
+		AccentColor = Color3.fromRGB(140, 70, 255),
+		AcrylicMain = Color3.fromRGB(34, 21, 57),
+		AcrylicBorder = Color3.fromRGB(64, 49, 94),
+		AcrylicGradient = ColorSequence.new(Color3.fromRGB(44, 30, 68), Color3.fromRGB(34, 21, 57)),
 		AcrylicNoise = 0.95,
-		TitleBarLine = Color3.fromRGB(55, 50, 75),
-		Tab = Color3.fromRGB(45, 40, 65),
-		Element = Color3.fromRGB(45, 40, 65),
-		ElementBorder = Color3.fromRGB(25, 20, 40),
-		InElementBorder = Color3.fromRGB(70, 65, 90),
+		TitleBarLine = Color3.fromRGB(55, 40, 75),
+		Tab = Color3.fromRGB(45, 30, 65),
+		Element = Color3.fromRGB(45, 30, 65),
+		ElementBorder = Color3.fromRGB(25, 15, 40),
+		InElementBorder = Color3.fromRGB(70, 55, 90),
 		ElementTransparency = 0,
-		ToggleSlider = Color3.fromRGB(80, 75, 105),
+		ToggleSlider = Color3.fromRGB(80, 65, 105),
 		ToggleToggled = Color3.fromRGB(255, 255, 255),
-		SliderRail = Color3.fromRGB(80, 75, 105),
-		DropdownFrame = Color3.fromRGB(70, 65, 90),
-		DropdownHolder = Color3.fromRGB(30, 25, 45),
-		DropdownBorder = Color3.fromRGB(25, 20, 40),
-		DropdownOption = Color3.fromRGB(70, 65, 90),
-		Keybind = Color3.fromRGB(70, 65, 90),
-		Input = Color3.fromRGB(70, 65, 90),
-		InputFocused = Color3.fromRGB(20, 15, 30),
-		InputIndicator = Color3.fromRGB(160, 145, 212),
-		InputIndicatorFocus = Color3.fromRGB(200, 130, 180),
-		Dialog = Color3.fromRGB(30, 25, 45),
-		DialogHolder = Color3.fromRGB(25, 20, 40),
-		DialogHolderLine = Color3.fromRGB(20, 15, 35),
-		DialogButton = Color3.fromRGB(45, 40, 65),
-		DialogButtonBorder = Color3.fromRGB(80, 75, 110),
-		DialogBorder = Color3.fromRGB(70, 65, 90),
-		DialogInput = Color3.fromRGB(45, 40, 65),
-		DialogInputLine = Color3.fromRGB(160, 145, 212),
-		Text = Color3.fromRGB(229, 229, 234),
-		SubText = Color3.fromRGB(168, 162, 194),
-		Hover = Color3.fromRGB(80, 75, 105),
+		SliderRail = Color3.fromRGB(80, 65, 105),
+		DropdownFrame = Color3.fromRGB(70, 55, 90),
+		DropdownHolder = Color3.fromRGB(30, 20, 45),
+		DropdownBorder = Color3.fromRGB(25, 15, 40),
+		DropdownOption = Color3.fromRGB(70, 55, 90),
+		Keybind = Color3.fromRGB(70, 55, 90),
+		Input = Color3.fromRGB(70, 55, 90),
+		InputFocused = Color3.fromRGB(20, 10, 30),
+		InputIndicator = Color3.fromRGB(140, 70, 255),
+		InputIndicatorFocus = Color3.fromRGB(190, 120, 255),
+		Dialog = Color3.fromRGB(30, 20, 45),
+		DialogHolder = Color3.fromRGB(25, 15, 40),
+		DialogHolderLine = Color3.fromRGB(20, 10, 35),
+		DialogButton = Color3.fromRGB(45, 30, 65),
+		DialogButtonBorder = Color3.fromRGB(80, 65, 110),
+		DialogBorder = Color3.fromRGB(70, 55, 90),
+		DialogInput = Color3.fromRGB(45, 30, 65),
+		DialogInputLine = Color3.fromRGB(140, 70, 255),
+		Text = Color3.fromRGB(229, 220, 234),
+		SubText = Color3.fromRGB(168, 152, 194),
+		Hover = Color3.fromRGB(80, 65, 105),
 		HoverChange = 0.04
 	}
 }
@@ -1430,6 +1430,28 @@ Components.Tab = (function()
 			end
 		end
 
+		local TabTextLabel = New("TextLabel", {
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = not fischbypass and Icon and UDim2.new(0, 30, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
+			Text = Title,
+			RichText = true,
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			TextTransparency = 0,
+			FontFace = Font.new(
+				"rbxasset://fonts/families/GothamSSm.json",
+				Enum.FontWeight.Regular,
+				Enum.FontStyle.Normal
+			),
+			TextSize = 12,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			Size = UDim2.new(1, -12, 1, 0),
+			BackgroundTransparency = 1,
+			ThemeTag = {
+				TextColor3 = "Text",
+			},
+		})
+
 		Tab.Frame = New("TextButton", {
 			Size = UDim2.new(1, 0, 0, 34),
 			BackgroundTransparency = 1,
@@ -1441,27 +1463,8 @@ Components.Tab = (function()
 			New("UICorner", {
 				CornerRadius = UDim.new(0, 6),
 			}),
-			New("TextLabel", {
-				AnchorPoint = Vector2.new(0, 0.5),
-				Position = not fischbypass and Icon and UDim2.new(0, 30, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
-				Text = Title,
-				RichText = true,
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextTransparency = 0,
-				FontFace = Font.new(
-					"rbxasset://fonts/families/GothamSSm.json",
-					Enum.FontWeight.Regular,
-					Enum.FontStyle.Normal
-				),
-				TextSize = 12,
-				TextXAlignment = "Left",
-				TextYAlignment = "Center",
-				Size = UDim2.new(1, -12, 1, 0),
-				BackgroundTransparency = 1,
-				ThemeTag = {
-					TextColor3 = "Text",
-				},
-			}),
+			New("UIScale"),
+			TabTextLabel,
 			New("ImageLabel", {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.fromOffset(16, 16),
@@ -1473,6 +1476,8 @@ Components.Tab = (function()
 				},
 			}),
 		})
+		
+		Tab.TextLabel = TabTextLabel
 
 		local ContainerLayout = New("UIListLayout", {
 			Padding = UDim.new(0, 5),
@@ -1508,12 +1513,22 @@ Components.Tab = (function()
 		end)
 
 		Tab.Motor, Tab.SetTransparency = Creator.SpringMotor(1, Tab.Frame, "BackgroundTransparency")
+		Tab.ScaleMotor = Flipper.SingleMotor.new(1)
+		Tab.ScaleMotor:onStep(function(s)
+			Tab.Frame.UIScale.Scale = s
+		end)
 
 		Creator.AddSignal(Tab.Frame.MouseEnter, function()
 			Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
+			if not Tab.Selected then
+				Tab.ScaleMotor:setGoal(Spring(1.03, { frequency = 8 }))
+			end
 		end)
 		Creator.AddSignal(Tab.Frame.MouseLeave, function()
 			Tab.SetTransparency(Tab.Selected and 0.89 or 1)
+			if not Tab.Selected then
+				Tab.ScaleMotor:setGoal(Spring(1, { frequency = 8 }))
+			end
 		end)
 		Creator.AddSignal(Tab.Frame.MouseButton1Down, function()
 			Tab.SetTransparency(0.92)
@@ -1565,11 +1580,17 @@ Components.Tab = (function()
 		for _, TabObject in next, TabModule.Tabs do
 			TabObject.SetTransparency(1)
 			TabObject.Selected = false
+			TabObject.ScaleMotor:setGoal(Spring(1, { frequency = 8 }))
+			Creator.OverrideTag(TabObject.TextLabel, {TextColor3 = "Text"})
 		end
-		TabModule.Tabs[Tab].SetTransparency(0.89)
-		TabModule.Tabs[Tab].Selected = true
 
-		Window.TabDisplay.Text = TabModule.Tabs[Tab].Name
+		local SelectedTab = TabModule.Tabs[Tab]
+		SelectedTab.SetTransparency(0.89)
+		SelectedTab.Selected = true
+		SelectedTab.ScaleMotor:setGoal(Spring(1.05, { frequency = 8 }))
+		Creator.OverrideTag(SelectedTab.TextLabel, {TextColor3 = "AccentColor"})
+
+		Window.TabDisplay.Text = SelectedTab.Name
 		Window.SelectorPosMotor:setGoal(Spring(TabModule:GetCurrentTabPos(), { frequency = 6 }))
 
 		task.spawn(function()
@@ -2266,49 +2287,68 @@ Components.TitleBar = (function()
 		}, {
 			New("Frame", {
 				Size = UDim2.new(1, -120, 1, 0),
-				Position = UDim2.fromOffset(16, 0),
+				Position = UDim2.fromOffset(12, 0),
 				BackgroundTransparency = 1,
 				ClipsDescendants = true
 			}, {
 				New("UIListLayout", {
-					Padding = UDim.new(0, -2),
-					FillDirection = Enum.FillDirection.Vertical,
+					Padding = UDim.new(0, 8),
+					FillDirection = Enum.FillDirection.Horizontal,
 					SortOrder = Enum.SortOrder.LayoutOrder,
-					HorizontalAlignment = Enum.HorizontalAlignment.Left,
 					VerticalAlignment = Enum.VerticalAlignment.Center,
 				}),
-				New("TextLabel", {
-					Text = Config.Title,
-					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
-					TextSize = 14,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.new(1, 0, 0, 16),
+				New("ImageLabel", {
+					Image = "rbxassetid://83063276186506",
+					Size = UDim2.fromOffset(24, 24),
 					BackgroundTransparency = 1,
-					LayoutOrder = 1,
-                    TextColor3 = Color3.fromRGB(255, 255, 255)
-				}, {
-					New("UIGradient", {
-						ThemeTag = {
-							Color = "Accent"
-						},
-						Rotation = 90
-					})
+					LayoutOrder = 0,
 				}),
-				Config.SubTitle and New("TextLabel", {
-					Text = Config.SubTitle,
-					TextTransparency = 0,
-					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
-					TextSize = 12,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.new(1, 0, 0, 14),
+				New("Frame", {
+					Size = UDim2.new(1, -40, 1, 0),
 					BackgroundTransparency = 1,
-					LayoutOrder = 2,
-					ThemeTag = {
-						TextColor3 = "SubText",
-					},
-				}) or nil,
+					AutomaticSize = Enum.AutomaticSize.X,
+					LayoutOrder = 1
+				}, {
+					New("UIListLayout", {
+						Padding = UDim.new(0, -2),
+						FillDirection = Enum.FillDirection.Vertical,
+						SortOrder = Enum.SortOrder.LayoutOrder,
+						HorizontalAlignment = Enum.HorizontalAlignment.Left,
+						VerticalAlignment = Enum.VerticalAlignment.Center,
+					}),
+					New("TextLabel", {
+						Text = Config.Title,
+						FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+						TextSize = 14,
+						TextXAlignment = "Left",
+						TextYAlignment = "Center",
+						Size = UDim2.new(1, 0, 0, 16),
+						BackgroundTransparency = 1,
+						LayoutOrder = 1,
+						TextColor3 = Color3.fromRGB(255, 255, 255)
+					}, {
+						New("UIGradient", {
+							ThemeTag = {
+								Color = "Accent"
+							},
+							Rotation = 90
+						})
+					}),
+					Config.SubTitle and New("TextLabel", {
+						Text = Config.SubTitle,
+						TextTransparency = 0,
+						FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextSize = 12,
+						TextXAlignment = "Left",
+						TextYAlignment = "Center",
+						Size = UDim2.new(1, 0, 0, 14),
+						BackgroundTransparency = 1,
+						LayoutOrder = 2,
+						ThemeTag = {
+							TextColor3 = "SubText",
+						},
+					}) or nil,
+				}),
 			}),
 			New("Frame", {
 				BackgroundTransparency = 0.5,
@@ -2582,6 +2622,25 @@ Components.Window = (function()
 			Position = UDim2.fromOffset(Window.TabWidth + 26, 90),
 			BackgroundTransparency = 1,
 		}, {
+			New("ImageLabel", {
+				Name = "Glow",
+				Image = "rbxassetid://5554236805",
+				ScaleType = Enum.ScaleType.Slice,
+				SliceCenter = Rect.new(49, 49, 50, 50),
+				Size = UDim2.new(1, 30, 1, 30),
+				Position = UDim2.fromScale(0.5, 0.5),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundTransparency = 1,
+				ImageColor3 = Color3.new(1, 1, 1),
+				ImageTransparency = 0.6,
+				ZIndex = -1,
+			}, {
+				New("UIGradient", {
+					ThemeTag = {
+						Color = "Accent"
+					},
+				})
+			}),
 			Window.ContainerAnim,
 			Window.ContainerHolder
 		})
