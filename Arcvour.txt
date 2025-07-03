@@ -3336,11 +3336,12 @@ Components.Window = (function()
 
 				local inset = GuiService:GetGuiInset()
 				local viewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
+				local margin = 10 
 
-				local targetSizeX = viewportSize.X
-				local targetSizeY = viewportSize.Y - inset.Y
-				local targetPosX = 0
-				local targetPosY = inset.Y
+				local targetSizeX = viewportSize.X - (margin * 2)
+				local targetSizeY = viewportSize.Y - inset.Y - (margin * 2)
+				local targetPosX = margin
+				local targetPosY = inset.Y + margin
 				
 				SizeMotor:setGoal({
 					X = Flipper[Instant and "Instant" or "Spring"].new(targetSizeX, { frequency = 8, dampingRatio = 1 }),
@@ -3428,9 +3429,8 @@ Components.Window = (function()
 				local newX = StartPos.X.Offset + Delta.X
 				local newY = StartPos.Y.Offset + Delta.Y
 
-				local inset = GuiService:GetGuiInset()
 				newX = math.clamp(newX, 0, viewportSize.X - windowSize.X)
-				newY = math.clamp(newY, inset.Y, viewportSize.Y - windowSize.Y)
+				newY = math.clamp(newY, 0, viewportSize.Y - windowSize.Y)
 				
 				Window.Position = UDim2.fromOffset(newX, newY)
 
