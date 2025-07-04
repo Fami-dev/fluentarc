@@ -1011,6 +1011,7 @@ function AcrylicPaint()
 					Rotation = 90,
 					ThemeTag = {
 						Color = "AcrylicGradient",
+						Transparency = NumberSequence.new(0)
 					},
 				}),
 			}),
