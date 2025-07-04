@@ -2297,12 +2297,12 @@ Components.TitleBar = (function()
 					SortOrder = Enum.SortOrder.LayoutOrder,
 					VerticalAlignment = Enum.VerticalAlignment.Center,
 				}),
-				New("ImageLabel", {
-					Image = "rbxassetid://83063276186506",
+				Config.Icon and New("ImageLabel", {
+					Image = Config.Icon,
 					Size = UDim2.fromOffset(24, 24),
 					BackgroundTransparency = 1,
 					LayoutOrder = 0,
-				}),
+				}) or nil,
 				New("Frame", {
 					Size = UDim2.new(1, -40, 1, 0),
 					BackgroundTransparency = 1,
@@ -2661,6 +2661,7 @@ Components.Window = (function()
 
 		Window.TitleBar = Components.TitleBar({
 			Title = Config.Title,
+			Icon = Config.Icon,
 			SubTitle = Config.SubTitle,
 			Parent = Window.Root,
 			Window = Window,

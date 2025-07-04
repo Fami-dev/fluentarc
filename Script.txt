@@ -3,6 +3,7 @@ local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Fami-d
 local Window = Fluent:CreateWindow({
     Title = "ArcvourHUB",
     SubTitle = "Climb And Jump Tower",
+    Icon = "rbxassetid://83063276186506",
     TabWidth = 160,
     Size = UDim2.fromOffset(500, 300),
     Acrylic = true,
