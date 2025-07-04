@@ -2814,18 +2814,22 @@ Components.Window = (function()
 		function Window:AnimateIn()
 			Window.Root.Visible = true
 			AnimationMotor:setGoal({
-				Scale = Flipper.Spring.new(1, { frequency = 4, dampingRatio = 0.7 }),
-				Transparency = Flipper.Spring.new(0, { frequency = 3 })
+				Scale = Flipper.Spring.new(1, { frequency = 3, dampingRatio = 0.75 }),
+				Transparency = Flipper.Spring.new(0, { frequency = 2.5 })
 			})
 		end
 		
 		function Window:AnimateOut(callback)
 			AnimationMotor:setGoal({
-				Scale = Flipper.Spring.new(0.8, { frequency = 5, dampingRatio = 0.8 }),
-				Transparency = Flipper.Spring.new(1, { frequency = 4 })
+				Scale = Flipper.Spring.new(0.8, { frequency = 3, dampingRatio = 0.8 }),
+				Transparency = Flipper.Spring.new(1, { frequency = 2.5 })
 			})
 			if callback then
-				AnimationMotor:onComplete(callback)
+				local onCompleteConnection
+				onCompleteConnection = AnimationMotor:onComplete(function()
+					callback()
+					onCompleteConnection:disconnect()
+				end)
 			end
 		end
 
@@ -6329,8 +6333,8 @@ function Library:CreateWindow(Config, KeyConfig)
 		end)
 
 		keyWindowMotor:setGoal({
-			Scale = Flipper.Spring.new(1, { frequency = 4, dampingRatio = 0.7 }),
-			Transparency = Flipper.Spring.new(0, { frequency = 3 })
+			Scale = Flipper.Spring.new(1, { frequency = 3, dampingRatio = 0.75 }),
+			Transparency = Flipper.Spring.new(0, { frequency = 2.5 })
 		})
 
 		local keyContentHolder = New("Frame", {
@@ -6425,11 +6429,14 @@ function Library:CreateWindow(Config, KeyConfig)
 			if KeyInput.Input.Text == KeyConfig.Key then
 				Library:Notify({ Title = "Success", Content = "Key verified.", Duration = 3 })
 				keyWindowMotor:setGoal({
-					Scale = Flipper.Spring.new(0.8, { frequency = 5, dampingRatio = 0.8 }),
-					Transparency = Flipper.Spring.new(1, { frequency = 4 })
+					Scale = Flipper.Spring.new(0.8, { frequency = 3, dampingRatio = 0.8 }),
+					Transparency = Flipper.Spring.new(1, { frequency = 2.5 })
 				})
-				keyWindowMotor:onComplete(function()
+				
+				local onCompleteConnection
+				onCompleteConnection = keyWindowMotor:onComplete(function()
 					keyVerifiedSignal:fire()
+					onCompleteConnection:disconnect()
 				end)
 			else
 				Library:Notify({ Title = "Error", Content = "Invalid key provided.", Duration = 4 })
