@@ -1759,6 +1759,7 @@ Components.Dialog = (function()
 	function Dialog:Create()
 		local NewDialog = {
 			Buttons = 0,
+			isClosing = false,
 		}
 
 		NewDialog.TintFrame = New("TextButton", {
@@ -1865,15 +1866,22 @@ Components.Dialog = (function()
 		end
 
 		function NewDialog:Close()
+			if NewDialog.isClosing then return end
+			NewDialog.isClosing = true
+
 			Library.DialogOpen = false
 			TintTransparency(1)
 			RootTransparency(1)
 			Scale(1.1)
-			if NewDialog.Root and NewDialog.Root.UIStroke then
-				NewDialog.Root.UIStroke:Destroy()
+			
+			task.wait(0.2)
+			
+			if NewDialog.Root and NewDialog.Root.Parent then
+				NewDialog.Root:Destroy()
 			end
-			task.wait(0.15)
-			NewDialog.TintFrame:Destroy()
+			if NewDialog.TintFrame and NewDialog.TintFrame.Parent then
+				NewDialog.TintFrame:Destroy()
+			end
 		end
 
 		function NewDialog:Button(Title, Callback)
