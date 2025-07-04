@@ -14,7 +14,7 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Farming = Window:AddTab({ Title = "Farming", Icon = "dollar-sign" }),
     Hatching = Window:AddTab({ Title = "Hatching", Icon = "egg" }),
-    Movement = Window:AddTab({ Title = "Movement", Icon = "footprints" }),
+    Movement = Window:AddTab({ Title = "Movement", Icon = "send" }),
     Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" })
 }
 
