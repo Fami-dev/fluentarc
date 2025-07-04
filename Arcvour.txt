@@ -6139,7 +6139,7 @@ function Library:CreateWindow(Config)
 	Library.Window = Window
 	table.insert(Library.Windows, Window)
 	
-	local minimizerSize = Mobile and UDim2.new(0.12, 0, 0, 0) or UDim2.fromOffset(50, 50)
+	local minimizerSize = Mobile and UDim2.new(0, 0, 0.1, 0) or UDim2.fromOffset(50, 50)
 	local minimizerPosition = Mobile and UDim2.new(0.44, 0, 0.025, 0) or UDim2.new(0.02, 0, 0.5, 0)
 
 	Window.Minimizer = New("Frame", {
@@ -6156,8 +6156,8 @@ function Library:CreateWindow(Config)
 	}, {
 		New("UIAspectRatioConstraint", {
 			AspectRatio = 1,
-			AspectType = Enum.AspectType.FitWithinMaxSize,
-			DominantAxis = Enum.DominantAxis.Width,
+			AspectType = Enum.AspectType.ScaleWithParentSize,
+			DominantAxis = Enum.DominantAxis.Height,
 		}),
 		New("UICorner", {
 			CornerRadius = UDim.new(1, 0),
@@ -6170,15 +6170,10 @@ function Library:CreateWindow(Config)
 		}, {
 			New("ImageLabel", {
 				Image = Icon or "rbxassetid://10734897102",
-				Size = UDim2.fromScale(0.8, 0.8),
+				Size = UDim2.fromScale(0.7, 0.7),
 				Position = UDim2.fromScale(0.5, 0.5),
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundTransparency = 1,
-			}, {
-				New("UIAspectRatioConstraint", {
-					AspectRatio = 1,
-					AspectType = Enum.AspectType.FitWithinMaxSize,
-				})
 			})
 		})
 	})
