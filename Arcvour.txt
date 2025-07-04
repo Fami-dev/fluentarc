@@ -6239,7 +6239,7 @@ function Library:CreateWindow(Config, KeyConfig)
 		local KeySystemTint = New("Frame", {
 			Size = UDim2.fromScale(1, 1),
 			BackgroundColor3 = Color3.new(),
-			BackgroundTransparency = 0.5,
+			BackgroundTransparency = 1,
 			Parent = GUI,
 			ZIndex = 99999
 		})
@@ -6254,7 +6254,7 @@ function Library:CreateWindow(Config, KeyConfig)
 			}
 		}, {
 			New("UICorner", {
-				CornerRadius = UDim.new(0, 8)
+				CornerRadius = UDim.new(0, 12)
 			}),
 			New("UIStroke", {
 				Transparency = 0.5,
@@ -6272,11 +6272,15 @@ function Library:CreateWindow(Config, KeyConfig)
 			Font = Enum.Font.GothamBold,
 			TextSize = 24,
 			BackgroundTransparency = 1,
-			Parent = KeyWindow,
-			ThemeTag = {
-				TextColor3 = "Text"
-			}
-		})
+			Parent = KeyWindow
+		}, {
+            New("UIGradient", {
+                ThemeTag = {
+                    Color = "Accent"
+                },
+                Rotation = 90
+            })
+        })
 
 		local InputHolder = New("Frame", {
 			Size = UDim2.new(1, -40, 0, 40),
@@ -6293,12 +6297,30 @@ function Library:CreateWindow(Config, KeyConfig)
 		})
 
 		local KeyInput = Components.Textbox(InputHolder, false)
-		KeyInput.Frame.Size = UDim2.new(1, -110, 1, -8) 
-		KeyInput.Input.PlaceholderText = "Enter Key..."
+		KeyInput.Frame.Size = UDim2.new(1, -110, 1, -8)
+		KeyInput.Input.PlaceholderText = "ARCVOUR-0000-0000"
+
+        New("ImageLabel", {
+            Size = UDim2.fromOffset(20, 20),
+            Position = UDim2.new(0, 12, 0.5, 0),
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Image = Library:GetIcon("key"),
+            BackgroundTransparency = 1,
+            Parent = KeyInput.Frame,
+            ThemeTag = {
+                ImageColor3 = "SubText"
+            }
+        })
+        
+        KeyInput.Container.Position = UDim2.new(0, 6 + 22, 0, 0)
+        KeyInput.Container.Size = UDim2.new(1, -12 - 22, 1, 0)
 
 		local VerifyButton = Components.Button("", InputHolder, true)
 		VerifyButton.Frame.Size = UDim2.fromOffset(100, 32)
 		VerifyButton.Title.Text = "Verify"
+        VerifyButton.Title.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        VerifyButton.Frame.BackgroundColor3 = Creator.GetThemeProperty("AccentColorLight")
+        Creator.OverrideTag(VerifyButton.Frame, {})
 
 		Creator.AddSignal(VerifyButton.Frame.MouseButton1Click, function()
 			if KeyInput.Input.Text == KeyConfig.Key then
