@@ -62,6 +62,11 @@ Arcvour = {
 		}),
 		AccentColor = Color3.fromRGB(140, 70, 255),
 		AccentColorLight = Color3.fromRGB(190, 120, 255),
+		ContainerGradient = ColorSequence.new(Color3.fromRGB(140, 70, 255)),
+		ContainerGradientTransparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(1, 0)
+		}),
 		ContainerGradientTransparency = NumberSequence.new(0),
 		AcrylicMain = Color3.fromRGB(34, 21, 57),
 		AcrylicBorder = Color3.fromRGB(75, 45, 130),
