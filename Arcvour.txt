@@ -61,6 +61,11 @@ local Themes = {
 			ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 120, 255))
 		}),
 		AccentColor = Color3.fromRGB(140, 70, 255),
+		AccentColorLight = Color3.fromRGB(190, 120, 255),
+		ContainerGradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 25, 65)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 15, 40))
+		}),
 		AcrylicMain = Color3.fromRGB(34, 21, 57),
 		AcrylicBorder = Color3.fromRGB(64, 49, 94),
 		AcrylicGradient = ColorSequence.new(Color3.fromRGB(44, 30, 68), Color3.fromRGB(34, 21, 57)),
@@ -1448,7 +1453,7 @@ Components.Tab = (function()
 			Size = UDim2.new(1, -12, 1, 0),
 			BackgroundTransparency = 1,
 			ThemeTag = {
-				TextColor3 = "Text",
+				TextColor3 = "SubText",
 			},
 		})
 
@@ -1522,12 +1527,14 @@ Components.Tab = (function()
 			Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
 			if not Tab.Selected then
 				Tab.ScaleMotor:setGoal(Spring(1.03, { frequency = 8 }))
+				Creator.OverrideTag(Tab.TextLabel, { TextColor3 = "AccentColorLight" })
 			end
 		end)
 		Creator.AddSignal(Tab.Frame.MouseLeave, function()
 			Tab.SetTransparency(Tab.Selected and 0.89 or 1)
 			if not Tab.Selected then
 				Tab.ScaleMotor:setGoal(Spring(1, { frequency = 8 }))
+				Creator.OverrideTag(Tab.TextLabel, { TextColor3 = "SubText" })
 			end
 		end)
 		Creator.AddSignal(Tab.Frame.MouseButton1Down, function()
@@ -1581,14 +1588,14 @@ Components.Tab = (function()
 			TabObject.SetTransparency(1)
 			TabObject.Selected = false
 			TabObject.ScaleMotor:setGoal(Spring(1, { frequency = 8 }))
-			Creator.OverrideTag(TabObject.TextLabel, {TextColor3 = "Text"})
+			Creator.OverrideTag(TabObject.TextLabel, {TextColor3 = "SubText"})
 		end
 
 		local SelectedTab = TabModule.Tabs[Tab]
 		SelectedTab.SetTransparency(0.89)
 		SelectedTab.Selected = true
 		SelectedTab.ScaleMotor:setGoal(Spring(1.05, { frequency = 8 }))
-		Creator.OverrideTag(SelectedTab.TextLabel, {TextColor3 = "AccentColor"})
+		Creator.OverrideTag(SelectedTab.TextLabel, {TextColor3 = "AccentColorLight"})
 
 		Window.TabDisplay.Text = SelectedTab.Name
 		Window.SelectorPosMotor:setGoal(Spring(TabModule:GetCurrentTabPos(), { frequency = 6 }))
@@ -2345,7 +2352,7 @@ Components.TitleBar = (function()
 						BackgroundTransparency = 1,
 						LayoutOrder = 2,
 						ThemeTag = {
-							TextColor3 = "SubText",
+							TextColor3 = "Text",
 						},
 					}) or nil,
 				}),
@@ -2622,6 +2629,19 @@ Components.Window = (function()
 			Position = UDim2.fromOffset(Window.TabWidth + 26, 90),
 			BackgroundTransparency = 1,
 		}, {
+			New("Frame", {
+				Size = UDim2.fromScale(1, 1),
+				BackgroundTransparency = 1,
+				ZIndex = 0
+			}, {
+				New("UIGradient", {
+					Rotation = 135,
+					ThemeTag = {
+						Color = "ContainerGradient",
+						Transparency = "ElementTransparency"
+					}
+				})
+			}),
 			New("ImageLabel", {
 				Name = "Glow",
 				Image = "rbxassetid://5554236805",
@@ -2652,6 +2672,18 @@ Components.Window = (function()
 			Parent = GUI,
 			ClipsDescendants = false,
 		}, {
+			New("ImageLabel", {
+				Name = "Shadow",
+				Image = "rbxassetid://5554236805",
+				ScaleType = Enum.ScaleType.Slice,
+				SliceCenter = Rect.new(49, 49, 50, 50),
+				Size = UDim2.new(1, 40, 1, 40),
+				Position = UDim2.fromScale(0.5, 0.5),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				ImageColor3 = Color3.new(0, 0, 0),
+				ImageTransparency = 0.7,
+				ZIndex = -2
+			}),
 			Window.AcrylicPaint.Frame,
 			Window.TabDisplay,
 			Window.ContainerCanvas,
