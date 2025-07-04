@@ -2943,12 +2943,21 @@ Components.Window = (function()
 			if Window.Minimized then
 				OldSize = Window.Root.Size
 				local headerHeight = Window.TitleBar.Frame.AbsoluteSize.Y
+				
+				-- BARIS PENTING YANG DITAMBAHKAN
+				TabFrame.Visible = false
+				Window.ContainerCanvas.Visible = false
+				
 				SizeMotor:setGoal({
 					X = Instant(OldSize.X.Offset),
 					Y = Instant(headerHeight)
 				})
 			else
 				if OldSize then
+					-- BARIS PENTING YANG DITAMBAHKAN
+					TabFrame.Visible = true
+					Window.ContainerCanvas.Visible = true
+
 					SizeMotor:setGoal({
 						X = Spring(OldSize.X.Offset, { frequency = 8, dampingRatio = 1 }),
 						Y = Spring(OldSize.Y.Offset, { frequency = 8, dampingRatio = 1 })
@@ -6200,52 +6209,25 @@ local MinimizeButton = New("TextButton", {
 })
 
 local Minimizer
+local minimizerSize = Mobile and UDim2.new(0.08, 0, 0.1642, 0) or UDim2.fromOffset(50, 50)
+local minimizerPosition = Mobile and UDim2.new(0.45, 0, 0.025, 0) or UDim2.new(0.02, 0, 0.5, 0)
+local cornerRadius = Mobile and UDim.new(0.25, 0) or UDim.new(1, 0)
 
-if Mobile then
-	Minimizer = New("Frame", {
-		Parent = GUI,
-		Size = UDim2.new(0.08, 1, 0.1642, 1),
-		Position = UDim2.new(0.45, 0, 0.025, 0),
-		BackgroundTransparency = 1,
-		ZIndex = 999999999,
-        Visible = false,
-	},
-	{
-		New("Frame", {
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-			Size = UDim2.new(1, 0, 1, 0),
-			BackgroundTransparency = 0.5,
-			BorderSizePixel = 0
-		}, {
-			New("UICorner", {
-				CornerRadius = UDim.new(0.25, 0),
-			}),
-			MinimizeButton
-		})
-	})
-else
-	Minimizer = New("Frame", {
-		Parent = GUI,
-		Size = UDim2.fromOffset(50, 50),
-		Position = UDim2.new(0.02, 0, 0.5, 0),
-		BackgroundTransparency = 1,
-		ZIndex = 999999999,
-		Visible = false
-	},
-	{
-		New("Frame", {
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-			Size = UDim2.fromScale(1, 1),
-			BackgroundTransparency = 0.5,
-			BorderSizePixel = 0
-		}, {
-			New("UICorner", {
-				CornerRadius = UDim.new(1, 0),
-			}),
-			MinimizeButton
-		})
-	})
-end
+Minimizer = New("Frame", {
+	Parent = GUI,
+	Size = minimizerSize,
+	Position = minimizerPosition,
+	BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+	BackgroundTransparency = 0.5, -- Diubah dari 1 menjadi 0.5
+	BorderSizePixel = 0,
+	ZIndex = 999999999,
+	Visible = false,
+}, {
+	New("UICorner", {
+		CornerRadius = cornerRadius,
+	}),
+	MinimizeButton
+})
 
 local isMinimizerDragging = false
 local minimizerDragStart, minimizerStartPos
