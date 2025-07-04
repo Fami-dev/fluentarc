@@ -68,15 +68,15 @@ Arcvour = {
 		}),
 		ContainerGradientTransparency = NumberSequence.new(0),
 		AcrylicMain = Color3.fromRGB(34, 21, 57),
-		AcrylicBorder = Color3.fromRGB(75, 45, 130),
+		AcrylicBorder = Color3.fromRGB(64, 49, 94),
 		AcrylicGradient = ColorSequence.new(Color3.fromRGB(44, 30, 68), Color3.fromRGB(34, 21, 57)),
 		AcrylicNoise = 0.95,
 		TitleBarLine = Color3.fromRGB(55, 40, 75),
 		Tab = Color3.fromRGB(45, 30, 65),
-		Element = Color3.fromRGB(255, 255, 255),
-		ElementBorder = Color3.fromRGB(200, 200, 200),
-		InElementBorder = Color3.fromRGB(220, 220, 220),
-		ElementTransparency = 0.85,
+		Element = Color3.fromRGB(45, 30, 65),
+		ElementBorder = Color3.fromRGB(25, 15, 40),
+		InElementBorder = Color3.fromRGB(70, 55, 90),
+		ElementTransparency = 0,
 		ToggleSlider = Color3.fromRGB(80, 65, 105),
 		ToggleToggled = Color3.fromRGB(255, 255, 255),
 		SliderRail = Color3.fromRGB(80, 65, 105),
@@ -99,7 +99,7 @@ Arcvour = {
 		DialogInputLine = Color3.fromRGB(140, 70, 255),
 		Text = Color3.fromRGB(229, 220, 234),
 		SubText = Color3.fromRGB(168, 152, 194),
-		Hover = Color3.fromRGB(230, 230, 230),
+		Hover = Color3.fromRGB(80, 65, 105),
 		HoverChange = 0.04
 	}
 }
@@ -2633,12 +2633,15 @@ Components.Window = (function()
 		}, {
 			New("Frame", {
 				Size = UDim2.fromScale(1, 1),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 0.5,
+				BackgroundTransparency = 0,
 				ZIndex = 0
 			}, {
-				New("UICorner", {
-					CornerRadius = UDim.new(0, 6),
+				New("UIGradient", {
+					Rotation = 135,
+					ThemeTag = {
+						Color = "ContainerGradient",
+						Transparency = "ContainerGradientTransparency"
+					}
 				})
 			}),
 			New("ImageLabel", {
