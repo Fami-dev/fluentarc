@@ -3036,7 +3036,7 @@ Components.Window = (function()
 		return Window
 	end
 end)()
-
+local NotificationModule = Components.Notification
 local ElementsTable = {}
 local AddSignal = Creator.AddSignal
 
