@@ -2661,7 +2661,7 @@ Components.Window = (function()
 			Size = Window.Size,
 			Position = Window.Position,
 			Parent = GUI,
-			ClipsDescendants = false,
+			ClipsDescendants = true,
 		}, {
 			New("ImageLabel", {
 				Name = "Shadow",
@@ -2924,38 +2924,37 @@ Components.Window = (function()
 		local isHiddenByClose = false
 
 		function Window:Minimize(isClosing)
-            if isClosing then
-                isHiddenByClose = true
-                Window.Root.Visible = false
-                if Minimizer then Minimizer.Visible = true end
-            else
-                if isHiddenByClose then
-                    isHiddenByClose = false
-                    Window.Root.Visible = true
-                    if Minimizer then Minimizer.Visible = false end
-                else
-                    Window.Minimized = not Window.Minimized
-                    if Window.Minimized then
-                        OldSize = Window.Root.Size
-                        local headerHeight = Window.TitleBar.Frame.AbsoluteSize.Y
-                        SizeMotor:setGoal({
-                            X = Instant(OldSize.X.Offset),
-                            Y = Instant(headerHeight)
-                        })
-                        Window.ContainerCanvas.Visible = false
-                        TabFrame.Visible = false
-                    else
-                        if OldSize then
-                            SizeMotor:setGoal({
-                                X = Spring(OldSize.X.Offset, { frequency = 8, dampingRatio = 1 }),
-                                Y = Spring(OldSize.Y.Offset, { frequency = 8, dampingRatio = 1 })
-                            })
-                        end
-                        Window.ContainerCanvas.Visible = true
-                        TabFrame.Visible = true
-                    end
-                end
-            end
+			if isClosing then
+				isHiddenByClose = true
+				Window.Root.Visible = false
+				if Minimizer then Minimizer.Visible = true end
+				return
+			end
+
+			if isHiddenByClose then
+				isHiddenByClose = false
+				Window.Root.Visible = true
+				if Minimizer then Minimizer.Visible = false end
+				return
+			end
+			
+			Window.Minimized = not Window.Minimized
+			
+			if Window.Minimized then
+				OldSize = Window.Root.Size
+				local headerHeight = Window.TitleBar.Frame.AbsoluteSize.Y
+				SizeMotor:setGoal({
+					X = Instant(OldSize.X.Offset),
+					Y = Instant(headerHeight)
+				})
+			else
+				if OldSize then
+					SizeMotor:setGoal({
+						X = Spring(OldSize.X.Offset, { frequency = 8, dampingRatio = 1 }),
+						Y = Spring(OldSize.Y.Offset, { frequency = 8, dampingRatio = 1 })
+					})
+				end
+			end
 		end
 
 		function Window:Destroy()
@@ -6227,8 +6226,8 @@ if Mobile then
 else
 	Minimizer = New("Frame", {
 		Parent = GUI,
-		Size = UDim2.new(0, 0, 0, 0),
-		Position = UDim2.new(0.45, 0, 0.025, 0),
+		Size = UDim2.fromOffset(50, 50),
+		Position = UDim2.new(0.02, 0, 0.5, 0),
 		BackgroundTransparency = 1,
 		ZIndex = 999999999,
 		Visible = false
@@ -6236,12 +6235,12 @@ else
 	{
 		New("Frame", {
 			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-			Size = UDim2.new(0, 0, 0, 0),
-			BackgroundTransparency = 0,
+			Size = UDim2.fromScale(1, 1),
+			BackgroundTransparency = 0.5,
 			BorderSizePixel = 0
 		}, {
 			New("UICorner", {
-				CornerRadius = UDim.new(0.25, 0),
+				CornerRadius = UDim.new(1, 0),
 			}),
 			MinimizeButton
 		})
