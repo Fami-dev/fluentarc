@@ -2639,7 +2639,7 @@ Components.Window = (function()
 				ZIndex = 0
 			}, {
 				New("UIGradient", {
-					Rotation = 45,
+					Rotation = 90,
 					Transparency = NumberSequence.new({
 						NumberSequenceKeypoint.new(0, 1),
 						NumberSequenceKeypoint.new(1, 0)
