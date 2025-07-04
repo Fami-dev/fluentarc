@@ -2370,27 +2370,17 @@ Components.TitleBar = (function()
 		})
 
 		TitleBar.CloseButton = BarButton(Components.Assets.Close, UDim2.new(1, -4, 0, 4), TitleBar.Frame, function()
-			Library.Window:Dialog({
-				Title = "Close",
-				Content = "Are you sure you want to unload the interface?",
-				Buttons = {
-					{
-						Title = "Yes",
-						Callback = function()
-							Library:Destroy()
-						end,
-					},
-					{
-						Title = "No",
-					},
-				},
-			})
+            if Library.Window and Library.Window.Minimize then
+			    Library.Window:Minimize(true) 
+            end
 		end)
 		TitleBar.MaxButton = BarButton(Components.Assets.Max, UDim2.new(1, -40, 0, 4), TitleBar.Frame, function()
 			Config.Window.Maximize(not Config.Window.Maximized)
 		end)
 		TitleBar.MinButton = BarButton(Components.Assets.Min, UDim2.new(1, -80, 0, 4), TitleBar.Frame, function()
-			Library.Window:Minimize()
+            if Library.Window and Library.Window.Minimize then
+			    Library.Window:Minimize(false)
+            end
 		end)
 
 		return TitleBar
@@ -2931,36 +2921,41 @@ Components.Window = (function()
 			end
 		end)
 
-		function Window:Minimize()
-			Window.Minimized = not Window.Minimized
-			Window.Root.Visible = not Window.Minimized
-			if not MinimizeNotif then
-				MinimizeNotif = true
-				local Key = Library.MinimizeKeybind and Library.MinimizeKeybind.Value or Library.MinimizeKey.Name
-				if not Mobile then Library:Notify({
-					Title = "Interface",
-					Content = "Press " .. Key .. " to toggle the interface.",
-					Duration = 6
-					})
-				else 
-					Library:Notify({
-						Title = "Interface",
-						Content = "Tap to the button to toggle the interface.",
-						Duration = 6
-					})
-				end
-			end
-			if not RunService:IsStudio() and Mobile and Minimizer then
-				pcall(function()
-					local minimizeButton = Minimizer:FindFirstChild("Frame"):FindFirstChild("TextButton")
-					if minimizeButton then
-						local imageLabel = minimizeButton:FindFirstChild("ImageLabel")
-						if imageLabel then
-							imageLabel.Image = Window.Minimized and "rbxassetid://10734896384" or "rbxassetid://10734897102"
-						end
-					end
-				end)
-			end
+		local isHiddenByClose = false
+
+		function Window:Minimize(isClosing)
+            if isClosing then
+                isHiddenByClose = true
+                Window.Root.Visible = false
+                if Minimizer then Minimizer.Visible = true end
+            else
+                if isHiddenByClose then
+                    isHiddenByClose = false
+                    Window.Root.Visible = true
+                    if Minimizer then Minimizer.Visible = false end
+                else
+                    Window.Minimized = not Window.Minimized
+                    if Window.Minimized then
+                        OldSize = Window.Root.Size
+                        local headerHeight = Window.TitleBar.Frame.AbsoluteSize.Y
+                        SizeMotor:setGoal({
+                            X = Instant(OldSize.X.Offset),
+                            Y = Instant(headerHeight)
+                        })
+                        Window.ContainerCanvas.Visible = false
+                        TabFrame.Visible = false
+                    else
+                        if OldSize then
+                            SizeMotor:setGoal({
+                                X = Spring(OldSize.X.Offset, { frequency = 8, dampingRatio = 1 }),
+                                Y = Spring(OldSize.Y.Offset, { frequency = 8, dampingRatio = 1 })
+                            })
+                        end
+                        Window.ContainerCanvas.Visible = true
+                        TabFrame.Visible = true
+                    end
+                end
+            end
 		end
 
 		function Window:Destroy()
@@ -6214,6 +6209,7 @@ if Mobile then
 		Position = UDim2.new(0.45, 0, 0.025, 0),
 		BackgroundTransparency = 1,
 		ZIndex = 999999999,
+        Visible = false,
 	},
 	{
 		New("Frame", {
@@ -6289,7 +6285,9 @@ Creator.AddSignal(UserInputService.InputChanged, function(input)
 end)
 
 AddSignal(MinimizeButton.MouseButton1Click, function()
-	Library.Window:Minimize()
+	if Library.Window and Library.Window.Minimize then
+        Library.Window:Minimize(false)
+    end
 end)
 
 task.wait(0.1)
