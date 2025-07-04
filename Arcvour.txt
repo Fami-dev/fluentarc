@@ -68,7 +68,7 @@ Arcvour = {
 		}),
 		ContainerGradientTransparency = NumberSequence.new(0),
 		AcrylicMain = Color3.fromRGB(34, 21, 57),
-		AcrylicBorder = Color3.fromRGB(64, 49, 94),
+		AcrylicBorder = Color3.fromRGB(75, 45, 130),
 		AcrylicGradient = ColorSequence.new(Color3.fromRGB(44, 30, 68), Color3.fromRGB(34, 21, 57)),
 		AcrylicNoise = 0.95,
 		TitleBarLine = Color3.fromRGB(55, 40, 75),
@@ -1206,16 +1206,12 @@ Components.Element = (function()
 		Element.Frame = New("TextButton", {
 			Visible = Options.Visible and Options.Visible or true,
 			Size = UDim2.new(1, 0, 0, 0),
-			BackgroundTransparency = 0.89,
-			BackgroundColor3 = Color3.fromRGB(130, 130, 130),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 0.9,
 			Parent = Parent,
 			AutomaticSize = Enum.AutomaticSize.Y,
 			Text = "",
 			LayoutOrder = 7,
-			ThemeTag = {
-				BackgroundColor3 = "Element",
-				BackgroundTransparency = "ElementTransparency",
-			},
 		}, {
 			New("UICorner", {
 				CornerRadius = UDim.new(0, 4),
@@ -1280,9 +1276,11 @@ Components.Element = (function()
 		end
 
 		if Hover then
-			local Themes = Library.Themes
+			local baseTransparency = 0.9
+			local hoverChange = 0.06
+
 			local Motor, SetTransparency = Creator.SpringMotor(
-				Creator.GetThemeProperty("ElementTransparency"),
+				baseTransparency,
 				Element.Frame,
 				"BackgroundTransparency",
 				false,
@@ -1290,16 +1288,16 @@ Components.Element = (function()
 			)
 
 			Creator.AddSignal(Element.Frame.MouseEnter, function()
-				SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
+				SetTransparency(baseTransparency - hoverChange)
 			end)
 			Creator.AddSignal(Element.Frame.MouseLeave, function()
-				SetTransparency(Creator.GetThemeProperty("ElementTransparency"))
+				SetTransparency(baseTransparency)
 			end)
 			Creator.AddSignal(Element.Frame.MouseButton1Down, function()
-				SetTransparency(Creator.GetThemeProperty("ElementTransparency") + Creator.GetThemeProperty("HoverChange"))
+				SetTransparency(baseTransparency + hoverChange)
 			end)
 			Creator.AddSignal(Element.Frame.MouseButton1Up, function()
-				SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
+				SetTransparency(baseTransparency - hoverChange)
 			end)
 		end
 
