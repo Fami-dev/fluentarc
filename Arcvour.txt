@@ -66,6 +66,7 @@ local Themes = {
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 25, 65)),
 			ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 15, 40))
 		}),
+		ContainerGradientTransparency = NumberSequence.new(0),
 		AcrylicMain = Color3.fromRGB(34, 21, 57),
 		AcrylicBorder = Color3.fromRGB(64, 49, 94),
 		AcrylicGradient = ColorSequence.new(Color3.fromRGB(44, 30, 68), Color3.fromRGB(34, 21, 57)),
@@ -2638,7 +2639,7 @@ Components.Window = (function()
 					Rotation = 135,
 					ThemeTag = {
 						Color = "ContainerGradient",
-						Transparency = "ElementTransparency"
+						Transparency = "ContainerGradientTransparency"
 					}
 				})
 			}),
