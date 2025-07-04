@@ -6100,138 +6100,222 @@ local InterfaceManager = {} do
 	end
 end
 
-function Library:CreateWindow(Config)
+function Library:CreateWindow(Config, KeyConfig)
 	assert(Config.Title, "Window - Missing Title")
 
 	if Library.Window then
 		print("You cannot create more than one window.")
 		return
 	end
+    
+    Library.Theme = Config.Theme or "Arcvour"
 
-	Library.MinimizeKey = Config.MinimizeKey or Enum.KeyCode.LeftControl
-	Library.UseAcrylic = Config.Acrylic or false
-	Library.Acrylic = Config.Acrylic or false
-	Library.Theme = Config.Theme or "Dark"
-	if Config.Acrylic then
-		Acrylic.init()
-	end
-
-	local Icon = Config.Icon
-	if not fischbypass then 
-		if Library:GetIcon(Icon) then
-			Icon = Library:GetIcon(Icon)
+	local function CreateActualWindow()
+		Library.MinimizeKey = Config.MinimizeKey or Enum.KeyCode.LeftControl
+		Library.UseAcrylic = Config.Acrylic or false
+		Library.Acrylic = Config.Acrylic or false
+		if Config.Acrylic then
+			Acrylic.init()
 		end
 
-		if Icon == "" or Icon == nil then
-			Icon = nil
+		local Icon = Config.Icon
+		if not fischbypass then
+			if Library:GetIcon(Icon) then
+				Icon = Library:GetIcon(Icon)
+			end
+
+			if Icon == "" or Icon == nil then
+				Icon = nil
+			end
 		end
-	end
 
-	local Window = Components.Window({
-		Parent = GUI,
-		Size = Config.Size,
-		Title = Config.Title,
-		Icon = Icon,
-		SubTitle = Config.SubTitle,
-		TabWidth = Config.TabWidth,
-	})
+		local Window = Components.Window({
+			Parent = GUI,
+			Size = Config.Size,
+			Title = Config.Title,
+			Icon = Icon,
+			SubTitle = Config.SubTitle,
+			TabWidth = Config.TabWidth,
+		})
 
-	Library.Window = Window
-	table.insert(Library.Windows, Window)
-	
-	local minimizerSize = Mobile and UDim2.new(0, 0, 0.12, 0) or UDim2.fromOffset(55, 55)
-	local minimizerPosition = Mobile and UDim2.new(0.44, 0, 0.025, 0) or UDim2.new(0.02, 0, 0.5, 0)
+		Library.Window = Window
+		table.insert(Library.Windows, Window)
 
-	Window.Minimizer = New("Frame", {
-		Parent = GUI,
-		Size = minimizerSize,
-		Position = minimizerPosition,
-		BackgroundTransparency = 0,
-		BorderSizePixel = 0,
-		ZIndex = 999999999,
-		Visible = false,
-		ThemeTag = {
-			BackgroundColor3 = "AcrylicMain",
-		},
-	}, {
-		New("UIAspectRatioConstraint", {
-			AspectRatio = 1,
-			AspectType = Enum.AspectType.ScaleWithParentSize,
-			DominantAxis = Enum.DominantAxis.Height,
-		}),
-		New("UICorner", {
-			CornerRadius = UDim.new(1, 0),
-		}),
-		New("UIStroke", {
-			Thickness = 2,
-			Transparency = 0.5,
-			ThemeTag = {
-				Color = "AccentColorLight",
-			},
-		}),
-		New("TextButton", {
-			Name = "MinimizeButton",
-			BackgroundTransparency = 1,
-			Size = UDim2.fromScale(1, 1),
+		local minimizerSize = Mobile and UDim2.new(0, 0, 0.12, 0) or UDim2.fromOffset(55, 55)
+		local minimizerPosition = Mobile and UDim2.new(0.44, 0, 0.025, 0) or UDim2.new(0.02, 0, 0.5, 0)
+
+		Window.Minimizer = New("Frame", {
+			Parent = GUI,
+			Size = minimizerSize,
+			Position = minimizerPosition,
+			BackgroundTransparency = 0,
 			BorderSizePixel = 0,
+			ZIndex = 999999999,
+			Visible = false,
+			ThemeTag = {
+				BackgroundColor3 = "AcrylicMain",
+			},
 		}, {
-			New("ImageLabel", {
-				Image = Icon or "rbxassetid://10734897102",
-				Size = UDim2.fromScale(0.7, 0.7),
-				Position = UDim2.fromScale(0.5, 0.5),
-				AnchorPoint = Vector2.new(0.5, 0.5),
+			New("UIAspectRatioConstraint", {
+				AspectRatio = 1,
+				AspectType = Enum.AspectType.ScaleWithParentSize,
+				DominantAxis = Enum.DominantAxis.Height,
+			}),
+			New("UICorner", {
+				CornerRadius = UDim.new(1, 0),
+			}),
+			New("UIStroke", {
+				Thickness = 2,
+				Transparency = 0.5,
+				ThemeTag = {
+					Color = "AccentColorLight",
+				},
+			}),
+			New("TextButton", {
+				Name = "MinimizeButton",
 				BackgroundTransparency = 1,
+				Size = UDim2.fromScale(1, 1),
+				BorderSizePixel = 0,
+			}, {
+				New("ImageLabel", {
+					Image = Icon or "rbxassetid://10734897102",
+					Size = UDim2.fromScale(0.7, 0.7),
+					Position = UDim2.fromScale(0.5, 0.5),
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundTransparency = 1,
+				})
 			})
 		})
-	})
 
-	local MinimizeButton = Window.Minimizer.MinimizeButton
-	local isMinimizerDragging = false
-	local minimizerDragStart, minimizerStartPos
+		local MinimizeButton = Window.Minimizer.MinimizeButton
+		local isMinimizerDragging = false
+		local minimizerDragStart, minimizerStartPos
 
-	AddSignal(MinimizeButton.InputBegan, function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			isMinimizerDragging = true
-			minimizerDragStart = input.Position
-			minimizerStartPos = Window.Minimizer.Position
-			
-			local endConnection
-			endConnection = UserInputService.InputEnded:Connect(function(endInput)
-				if endInput.UserInputType == input.UserInputType then
-					isMinimizerDragging = false
-					if endConnection then
-						endConnection:Disconnect()
+		AddSignal(MinimizeButton.InputBegan, function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				isMinimizerDragging = true
+				minimizerDragStart = input.Position
+				minimizerStartPos = Window.Minimizer.Position
+
+				local endConnection
+				endConnection = UserInputService.InputEnded:Connect(function(endInput)
+					if endInput.UserInputType == input.UserInputType then
+						isMinimizerDragging = false
+						if endConnection then
+							endConnection:Disconnect()
+						end
 					end
-				end
-			end)
-		end
-	end)
+				end)
+			end
+		end)
 
-	AddSignal(UserInputService.InputChanged, function(input)
-		if isMinimizerDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			local viewportSize = workspace.Camera.ViewportSize
-			local delta = input.Position - minimizerDragStart
-			
-			local newX = minimizerStartPos.X.Scale + (delta.X / viewportSize.X)
-			local newY = minimizerStartPos.Y.Scale + (delta.Y / viewportSize.Y)
-			
-			local clampedX = math.clamp(newX, 0, 1 - (Window.Minimizer.AbsoluteSize.X / viewportSize.X))
-			local clampedY = math.clamp(newY, 0, 1 - (Window.Minimizer.AbsoluteSize.Y / viewportSize.Y))
-			
-			Window.Minimizer.Position = UDim2.fromScale(clampedX, clampedY)
-		end
-	end)
+		AddSignal(UserInputService.InputChanged, function(input)
+			if isMinimizerDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+				local viewportSize = workspace.Camera.ViewportSize
+				local delta = input.Position - minimizerDragStart
+				local newX = minimizerStartPos.X.Scale + (delta.X / viewportSize.X)
+				local newY = minimizerStartPos.Y.Scale + (delta.Y / viewportSize.Y)
+				local clampedX = math.clamp(newX, 0, 1 - (Window.Minimizer.AbsoluteSize.X / viewportSize.X))
+				local clampedY = math.clamp(newY, 0, 1 - (Window.Minimizer.AbsoluteSize.Y / viewportSize.Y))
+				Window.Minimizer.Position = UDim2.fromScale(clampedX, clampedY)
+			end
+		end)
 
-	AddSignal(MinimizeButton.MouseButton1Click, function()
-		if Window and Window.Minimize then
-			Window:Minimize(false)
-		end
-	end)
+		AddSignal(MinimizeButton.MouseButton1Click, function()
+			if Window and Window.Minimize then
+				Window:Minimize(false)
+			end
+		end)
 
-	InterfaceManager:SetTheme(Config.Theme)
-	Library:SetTheme(Config.Theme)
+		InterfaceManager:SetTheme(Config.Theme)
+		Library:SetTheme(Config.Theme)
 
-	return Window
+		return Window
+	end
+
+	if KeyConfig and KeyConfig.Enabled then
+		local keyVerifiedSignal = Signal.new()
+
+		local KeySystemTint = New("Frame", {
+			Size = UDim2.fromScale(1, 1),
+			BackgroundColor3 = Color3.new(),
+			BackgroundTransparency = 0.5,
+			Parent = GUI,
+			ZIndex = 99999
+		})
+
+		local KeyWindow = New("CanvasGroup", {
+			Size = UDim2.fromOffset(400, 200),
+			Position = UDim2.fromScale(0.5, 0.5),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Parent = KeySystemTint,
+			ThemeTag = {
+				BackgroundColor3 = "Dialog"
+			}
+		}, {
+			New("UICorner", {
+				CornerRadius = UDim.new(0, 8)
+			}),
+			New("UIStroke", {
+				Transparency = 0.5,
+				ThemeTag = {
+					Color = "DialogBorder"
+				}
+			})
+		})
+
+		local Title = New("TextLabel", {
+			Size = UDim2.new(1, -20, 0, 50),
+			Position = UDim2.new(0.5, 0, 0, 20),
+			AnchorPoint = Vector2.new(0.5, 0),
+			Text = KeyConfig.KeySystemTitle or "Verification",
+			Font = Enum.Font.GothamBold,
+			TextSize = 24,
+			BackgroundTransparency = 1,
+			Parent = KeyWindow,
+			ThemeTag = {
+				TextColor3 = "Text"
+			}
+		})
+
+		local InputHolder = New("Frame", {
+			Size = UDim2.new(1, -40, 0, 40),
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundTransparency = 1,
+			Parent = KeyWindow
+		}, {
+			New("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+				Padding = UDim.new(0, 10)
+			})
+		})
+
+		local KeyInput = Components.Textbox(InputHolder, false)
+		KeyInput.Frame.Size = UDim2.new(1, -110, 1, -8) 
+		KeyInput.Input.PlaceholderText = "Enter Key..."
+
+		local VerifyButton = Components.Button("", InputHolder, true)
+		VerifyButton.Frame.Size = UDim2.fromOffset(100, 32)
+		VerifyButton.Title.Text = "Verify"
+
+		Creator.AddSignal(VerifyButton.Frame.MouseButton1Click, function()
+			if KeyInput.Input.Text == KeyConfig.Key then
+				Library:Notify({ Title = "Success", Content = "Key verified.", Duration = 3 })
+				keyVerifiedSignal:fire()
+			else
+				Library:Notify({ Title = "Error", Content = "Invalid key provided.", Duration = 4 })
+				KeyInput.Input.Text = ""
+			end
+		end)
+
+		keyVerifiedSignal:wait()
+
+		KeySystemTint:Destroy()
+	end
+
+	return CreateActualWindow()
 end
 
 function Library:SetTheme(Value)

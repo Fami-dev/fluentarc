@@ -9,6 +9,10 @@ local Window = Fluent:CreateWindow({
     Acrylic = true,
     Theme = "Arcvour",
     MinimizeKey = Enum.KeyCode.K
+}, {
+    Enabled = true,
+    KeySystemTitle = "ArcvourHUB",
+    Key = "ARCVOUR-KEY"
 })
 
 local Tabs = {
