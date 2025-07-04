@@ -1437,6 +1437,17 @@ Components.Tab = (function()
 			end
 		end
 
+		local FontRegular = Font.new(
+			"rbxasset://fonts/families/GothamSSm.json",
+			Enum.FontWeight.Regular,
+			Enum.FontStyle.Normal
+		)
+		local FontBold = Font.new(
+			"rbxasset://fonts/families/GothamSSm.json",
+			Enum.FontWeight.SemiBold,
+			Enum.FontStyle.Normal
+		)
+
 		local TabTextLabel = New("TextLabel", {
 			AnchorPoint = Vector2.new(0, 0.5),
 			Position = not fischbypass and Icon and UDim2.new(0, 30, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
@@ -1444,11 +1455,7 @@ Components.Tab = (function()
 			RichText = true,
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextTransparency = 0,
-			FontFace = Font.new(
-				"rbxasset://fonts/families/GothamSSm.json",
-				Enum.FontWeight.Regular,
-				Enum.FontStyle.Normal
-			),
+			FontFace = FontRegular,
 			TextSize = 12,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
@@ -1479,7 +1486,7 @@ Components.Tab = (function()
 
 		Tab.Frame = New("TextButton", {
 			Size = UDim2.new(1, 0, 0, 34),
-			BackgroundTransparency = 1,
+			BackgroundTransparency = 0.95,
 			Parent = Parent,
 			ClipsDescendants = true,
 			ThemeTag = {
@@ -1540,9 +1547,10 @@ Components.Tab = (function()
 			Tab.ContainerFrame.CanvasSize = UDim2.new(0, 0, 0, ContainerLayout.AbsoluteContentSize.Y + 2)
 		end)
 
-		Tab.Motor, Tab.SetTransparency = Creator.SpringMotor(1, Tab.Frame, "BackgroundTransparency")
+		Tab.Motor, Tab.SetTransparency = Creator.SpringMotor(0.95, Tab.Frame, "BackgroundTransparency")
 		Tab.ScaleMotor = Flipper.SingleMotor.new(1)
 		Tab.LineMotor = Flipper.SingleMotor.new(0)
+		Tab.FontSizeMotor = Flipper.SingleMotor.new(12)
 
 		Tab.ScaleMotor:onStep(function(s)
 			Tab.Frame.UIScale.Scale = s
@@ -1552,15 +1560,25 @@ Components.Tab = (function()
 			Tab.SelectionLine.Size = UDim2.new(s, 0, 0, 2)
 		end)
 
+		Tab.FontSizeMotor:onStep(function(s)
+			Tab.TextLabel.TextSize = s
+		end)
+
 		Creator.AddSignal(Tab.Frame.MouseEnter, function()
 			if not Tab.Selected then
 				Tab.ScaleMotor:setGoal(Spring(1.03, { frequency = 8 }))
+				Tab.SetTransparency(0.85)
+				Tab.TextLabel.FontFace = FontBold
+				Tab.FontSizeMotor:setGoal(Spring(13, { frequency = 8 }))
 				Creator.OverrideTag(Tab.TextLabel, { TextColor3 = "AccentColorLight" })
 			end
 		end)
 		Creator.AddSignal(Tab.Frame.MouseLeave, function()
 			if not Tab.Selected then
 				Tab.ScaleMotor:setGoal(Spring(1, { frequency = 8 }))
+				Tab.SetTransparency(0.95)
+				Tab.TextLabel.FontFace = FontRegular
+				Tab.FontSizeMotor:setGoal(Spring(12, { frequency = 8 }))
 				Creator.OverrideTag(Tab.TextLabel, { TextColor3 = "SubText" })
 			end
 		end)
@@ -1602,21 +1620,28 @@ Components.Tab = (function()
 
 	function TabModule:SelectTab(Tab)
 		local Window = TabModule.Window
+		
+		local FontRegular = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+		local FontBold = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
 
 		TabModule.SelectedTab = Tab
 
 		for _, TabObject in next, TabModule.Tabs do
-			TabObject.SetTransparency(1)
+			TabObject.SetTransparency(0.95)
 			TabObject.Selected = false
 			TabObject.ScaleMotor:setGoal(Spring(1, { frequency = 8 }))
+			TabObject.TextLabel.FontFace = FontRegular
+			TabObject.FontSizeMotor:setGoal(Spring(12, { frequency = 8 }))
 			Creator.OverrideTag(TabObject.TextLabel, {TextColor3 = "SubText"})
 			TabObject.LineMotor:setGoal(Spring(0, { frequency = 8 }))
 		end
 
 		local SelectedTab = TabModule.Tabs[Tab]
-		SelectedTab.SetTransparency(1)
+		SelectedTab.SetTransparency(0.8)
 		SelectedTab.Selected = true
 		SelectedTab.ScaleMotor:setGoal(Spring(1.05, { frequency = 8 }))
+		SelectedTab.TextLabel.FontFace = FontBold
+		SelectedTab.FontSizeMotor:setGoal(Spring(13, { frequency = 8 }))
 		Creator.OverrideTag(SelectedTab.TextLabel, {TextColor3 = "AccentColorLight"})
 		SelectedTab.LineMotor:setGoal(Spring(1, { frequency = 8 }))
 
