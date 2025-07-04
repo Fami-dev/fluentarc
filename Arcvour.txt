@@ -2762,12 +2762,11 @@ Components.Window = (function()
 
 				local inset = GuiService:GetGuiInset()
 				local currentViewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
-				local margin = 10
-
+				
 				local targetSizeX = currentViewportSize.X
-				local targetSizeY = currentViewportSize.Y - inset.Y - margin
+				local targetSizeY = currentViewportSize.Y
 				local targetPosX = 0
-				local targetPosY = inset.Y
+				local targetPosY = 0
 
 				SizeMotor:setGoal({
 					X = Flipper[Instant and "Instant" or "Spring"].new(targetSizeX, { frequency = 8, dampingRatio = 1 }),
@@ -2804,18 +2803,16 @@ Components.Window = (function()
 				Input.UserInputType == Enum.UserInputType.MouseButton1
 				or Input.UserInputType == Enum.UserInputType.Touch
 			then
+				if Window.Maximized then
+					local mousePosPercentage = (Input.Position.X - Window.Root.AbsolutePosition.X) / Window.Root.AbsoluteSize.X
+					Window:Maximize(false, true, true)
+					StartPos = UDim2.fromOffset(Input.Position.X - (Window.Root.AbsoluteSize.X * mousePosPercentage), Input.Position.Y - 15)
+				else
+					StartPos = Window.Root.Position
+				end
+
 				Dragging = true
 				MousePos = Input.Position
-				StartPos = Window.Root.Position
-
-				if Window.Maximized and OldSize then
-					local oldSizeX = OldSize.X.Offset
-					local oldSizeY = OldSize.Y.Offset
-					StartPos = UDim2.fromOffset(
-						Mouse.X - (Mouse.X * ((oldSizeX - 100) / Window.Root.AbsoluteSize.X)),
-						Mouse.Y - (Mouse.Y * (oldSizeY / Window.Root.AbsoluteSize.Y))
-					)
-				end
 
 				Input.Changed:Connect(function()
 					if Input.UserInputState == Enum.UserInputState.End then
@@ -2867,10 +2864,6 @@ Components.Window = (function()
 					X = Instant(Window.Position.X.Offset),
 					Y = Instant(Window.Position.Y.Offset),
 				})
-
-				if Window.Maximized then
-					Window.Maximize(false, true, true)
-				end
 			end
 
 			if
