@@ -2762,11 +2762,12 @@ Components.Window = (function()
 
 				local inset = GuiService:GetGuiInset()
 				local currentViewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
-				
+				local margin = 10
+
 				local targetSizeX = currentViewportSize.X
-				local targetSizeY = currentViewportSize.Y
+				local targetSizeY = currentViewportSize.Y - inset.Y - margin
 				local targetPosX = 0
-				local targetPosY = 0
+				local targetPosY = inset.Y
 
 				SizeMotor:setGoal({
 					X = Flipper[Instant and "Instant" or "Spring"].new(targetSizeX, { frequency = 8, dampingRatio = 1 }),
@@ -4743,7 +4744,89 @@ end)()
 local NotificationModule = Components.Notification
 NotificationModule:Init(GUI)
 
+local Minimizer
 local New = Creator.New
+
+do
+	local minimizerSize = Mobile and UDim2.new(0.08, 0, 0.1642, 0) or UDim2.fromOffset(50, 50)
+	local minimizerPosition = Mobile and UDim2.new(0.45, 0, 0.025, 0) or UDim2.new(0.02, 0, 0.5, 0)
+	local cornerRadius = Mobile and UDim.new(0.25, 0) or UDim.new(1, 0)
+
+	Minimizer = New("Frame", {
+		Parent = GUI,
+		Size = minimizerSize,
+		Position = minimizerPosition,
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundTransparency = 0.5,
+		BorderSizePixel = 0,
+		ZIndex = 999999999,
+		Visible = false,
+	}, {
+		New("UICorner", {
+			CornerRadius = cornerRadius,
+		}),
+		New("TextButton", {
+			Name = "MinimizeButton",
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1, 0, 1, 0),
+			BorderSizePixel = 0
+		}, {
+			New("UIPadding", {
+				PaddingBottom = UDim.new(0, 2),
+				PaddingLeft = UDim.new(0, 2),
+				PaddingRight = UDim.new(0, 2),
+				PaddingTop = UDim.new(0, 2),
+			}),
+			New("ImageLabel", {
+				Image = Mobile and (Button_Icon ~= "" and Button_Icon or "rbxassetid://10734897102") or "rbxassetid://10734897102",
+				Size = UDim2.new(1, 0, 1, 0),
+				BackgroundTransparency = 1,
+			}, {
+				New("UIAspectRatioConstraint", {
+					AspectRatio = 1,
+					AspectType = Enum.AspectType.FitWithinMaxSize,
+				})
+			})
+		})
+	})
+
+	local MinimizeButton = Minimizer.MinimizeButton
+	local isMinimizerDragging = false
+	local minimizerDragStart, minimizerStartPos
+
+	Creator.AddSignal(MinimizeButton.InputBegan, function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			isMinimizerDragging = true
+			minimizerDragStart = input.Position
+			minimizerStartPos = Minimizer.Position
+			
+			local endConnection
+			endConnection = UserInputService.InputEnded:Connect(function(endInput)
+				if endInput.UserInputType == input.UserInputType then
+					isMinimizerDragging = false
+					if endConnection then
+						endConnection:Disconnect()
+					end
+				end
+			end)
+		end
+	end)
+
+	Creator.AddSignal(UserInputService.InputChanged, function(input)
+		if isMinimizerDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local viewportSize = workspace.Camera.ViewportSize
+			local delta = input.Position - minimizerDragStart
+			
+			local newX = minimizerStartPos.X.Scale + (delta.X / viewportSize.X)
+			local newY = minimizerStartPos.Y.Scale + (delta.Y / viewportSize.Y)
+			
+			local clampedX = math.clamp(newX, 0, 1 - (Minimizer.AbsoluteSize.X / viewportSize.X))
+			local clampedY = math.clamp(newY, 0, 1 - (Minimizer.AbsoluteSize.Y / viewportSize.Y))
+			
+			Minimizer.Position = UDim2.fromScale(clampedX, clampedY)
+		end
+	end)
+end
 
 local Icons = {
 	["lucide-accessibility"] = "rbxassetid://10709751939",
@@ -6186,87 +6269,7 @@ else
 	Fluent = Library
 end
 
-local MinimizeButton = New("TextButton", {
-	BackgroundTransparency = 1,
-	Size = UDim2.new(1, 0, 1, 0),
-	BorderSizePixel = 0
-}, {
-	New("UIPadding", {
-		PaddingBottom = UDim.new(0, 2),
-		PaddingLeft = UDim.new(0, 2),
-		PaddingRight = UDim.new(0, 2),
-		PaddingTop = UDim.new(0, 2),
-	}),
-	New("ImageLabel", {
-		Image = Mobile and (Button_Icon ~= "" and Button_Icon or "rbxassetid://10734897102") or "rbxassetid://10734897102",
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundTransparency = 1,
-	}, {
-		New("UIAspectRatioConstraint", {
-			AspectRatio = 1,
-			AspectType = Enum.AspectType.FitWithinMaxSize,
-		})
-	})
-})
-
-local Minimizer
-local minimizerSize = Mobile and UDim2.new(0.08, 0, 0.1642, 0) or UDim2.fromOffset(50, 50)
-local minimizerPosition = Mobile and UDim2.new(0.45, 0, 0.025, 0) or UDim2.new(0.02, 0, 0.5, 0)
-local cornerRadius = Mobile and UDim.new(0.25, 0) or UDim.new(1, 0)
-
-Minimizer = New("Frame", {
-	Parent = GUI,
-	Size = minimizerSize,
-	Position = minimizerPosition,
-	BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-	BackgroundTransparency = 0.5, -- Diubah dari 1 menjadi 0.5
-	BorderSizePixel = 0,
-	ZIndex = 999999999,
-	Visible = false,
-}, {
-	New("UICorner", {
-		CornerRadius = cornerRadius,
-	}),
-	MinimizeButton
-})
-
-local isMinimizerDragging = false
-local minimizerDragStart, minimizerStartPos
-
-Creator.AddSignal(MinimizeButton.InputBegan, function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        isMinimizerDragging = true
-        minimizerDragStart = input.Position
-        minimizerStartPos = Minimizer.Position
-        
-        local endConnection
-        endConnection = UserInputService.InputEnded:Connect(function(endInput)
-            if endInput.UserInputType == input.UserInputType then
-                isMinimizerDragging = false
-                if endConnection then
-                    endConnection:Disconnect()
-                end
-            end
-        end)
-    end
-end)
-
-Creator.AddSignal(UserInputService.InputChanged, function(input)
-    if isMinimizerDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local viewportSize = workspace.Camera.ViewportSize
-        local delta = input.Position - minimizerDragStart
-        
-        local newX = minimizerStartPos.X.Scale + (delta.X / viewportSize.X)
-        local newY = minimizerStartPos.Y.Scale + (delta.Y / viewportSize.Y)
-        
-        local clampedX = math.clamp(newX, 0, 1 - (Minimizer.AbsoluteSize.X / viewportSize.X))
-        local clampedY = math.clamp(newY, 0, 1 - (Minimizer.AbsoluteSize.Y / viewportSize.Y))
-        
-        Minimizer.Position = UDim2.fromScale(clampedX, clampedY)
-    end
-end)
-
-AddSignal(MinimizeButton.MouseButton1Click, function()
+AddSignal(Minimizer.MinimizeButton.MouseButton1Click, function()
 	if Library.Window and Library.Window.Minimize then
         Library.Window:Minimize(false)
     end
