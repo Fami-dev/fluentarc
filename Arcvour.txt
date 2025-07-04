@@ -63,8 +63,8 @@ local Themes = {
 		AccentColor = Color3.fromRGB(140, 70, 255),
 		AccentColorLight = Color3.fromRGB(190, 120, 255),
 		ContainerGradient = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 25, 65)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 15, 40))
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 50, 155)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(110, 70, 175))
 		}),
 		ContainerGradientTransparency = NumberSequence.new(0),
 		AcrylicMain = Color3.fromRGB(34, 21, 57),
