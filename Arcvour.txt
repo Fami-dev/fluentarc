@@ -2632,19 +2632,16 @@ Components.Window = (function()
 			Position = UDim2.fromOffset(Window.TabWidth + 26, 90),
 			BackgroundTransparency = 1,
 		}, {
-			New("Frame", {
-				Size = UDim2.fromScale(1, 1),
-				BackgroundColor3 = Color3.fromRGB(95, 65, 150),
-				BackgroundTransparency = 0,
+			New("ImageLabel", {
+				Size = UDim2.fromScale(2.5, 2.5),
+				Position = UDim2.fromScale(1, 1),
+				AnchorPoint = Vector2.new(1, 1),
+				Image = "rbxassetid://5554236805",
+				ImageColor3 = Color3.fromRGB(95, 65, 150),
+				ImageTransparency = 0.5,
+				BackgroundTransparency = 1,
+				ScaleType = Enum.ScaleType.Stretch,
 				ZIndex = 0
-			}, {
-				New("UIGradient", {
-					Rotation = 90,
-					Transparency = NumberSequence.new({
-						NumberSequenceKeypoint.new(0, 1),
-						NumberSequenceKeypoint.new(1, 0)
-					})
-				})
 			}),
 			New("ImageLabel", {
 				Name = "Glow",
