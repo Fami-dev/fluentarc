@@ -3677,6 +3677,10 @@ ElementsTable.Dropdown = (function()
 						else
 							Dropdown:Display()
 						end
+						
+						if not Config.Multi then
+							Dropdown:Close()
+						end
 
 						Library:SafeCallback(Dropdown.Callback, Dropdown.Value)
 						Library:SafeCallback(Dropdown.Changed, Dropdown.Value)
