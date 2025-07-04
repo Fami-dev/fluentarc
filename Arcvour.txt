@@ -2750,19 +2750,25 @@ Components.Window = (function()
 			Window.Maximized = Value
 			Window.TitleBar.MaxButton.Frame.Icon.Image = Value and Components.Assets.Restore or Components.Assets.Max
 
+			if Window.Minimized then
+				Window.Minimized = false
+				TabFrame.Visible = true
+				Window.ContainerCanvas.Visible = true
+			end
+
 			if Value then
 				OldSize = Window.Root.Size
 				OldPosition = Window.Root.Position
 
 				local inset = GuiService:GetGuiInset()
 				local currentViewportSize = (Camera and Camera.ViewportSize) or Vector2.new(800, 600)
-				local margin = 10 
+				local margin = 10
 
 				local targetSizeX = currentViewportSize.X
 				local targetSizeY = currentViewportSize.Y - inset.Y - margin
 				local targetPosX = 0
-				local targetPosY = 0
-				
+				local targetPosY = inset.Y
+
 				SizeMotor:setGoal({
 					X = Flipper[Instant and "Instant" or "Spring"].new(targetSizeX, { frequency = 8, dampingRatio = 1 }),
 					Y = Flipper[Instant and "Instant" or "Spring"].new(targetSizeY, { frequency = 8, dampingRatio = 1 }),
@@ -2941,10 +2947,13 @@ Components.Window = (function()
 			Window.Minimized = not Window.Minimized
 			
 			if Window.Minimized then
+				if Window.Maximized then
+					Window:Maximize(false, false, true)
+				end
+
 				OldSize = Window.Root.Size
 				local headerHeight = Window.TitleBar.Frame.AbsoluteSize.Y
 				
-				-- BARIS PENTING YANG DITAMBAHKAN
 				TabFrame.Visible = false
 				Window.ContainerCanvas.Visible = false
 				
@@ -2954,7 +2963,6 @@ Components.Window = (function()
 				})
 			else
 				if OldSize then
-					-- BARIS PENTING YANG DITAMBAHKAN
 					TabFrame.Visible = true
 					Window.ContainerCanvas.Visible = true
 
