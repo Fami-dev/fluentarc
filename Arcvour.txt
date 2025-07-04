@@ -2634,15 +2634,16 @@ Components.Window = (function()
 		}, {
 			New("Frame", {
 				Size = UDim2.fromScale(1, 1),
+				BackgroundColor3 = Color3.fromRGB(95, 65, 150),
 				BackgroundTransparency = 0,
 				ZIndex = 0
 			}, {
 				New("UIGradient", {
 					Rotation = 135,
-					ThemeTag = {
-						Color = "ContainerGradient",
-						Transparency = "ContainerGradientTransparency"
-					}
+					Transparency = NumberSequence.new({
+						NumberSequenceKeypoint.new(0, 1),
+						NumberSequenceKeypoint.new(1, 0)
+					})
 				})
 			}),
 			New("ImageLabel", {
