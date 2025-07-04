@@ -68,7 +68,7 @@ Arcvour = {
 		}),
 		ContainerGradientTransparency = NumberSequence.new(0),
 		AcrylicMain = Color3.fromRGB(34, 21, 57),
-		AcrylicBorder = Color3.fromRGB(64, 49, 94),
+		AcrylicBorder = Color3.fromRGB(75, 45, 130),
 		AcrylicGradient = ColorSequence.new(Color3.fromRGB(44, 30, 68), Color3.fromRGB(34, 21, 57)),
 		AcrylicNoise = 0.95,
 		TitleBarLine = Color3.fromRGB(55, 40, 75),
