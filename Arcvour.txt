@@ -6141,20 +6141,21 @@ function Library:CreateWindow(Config)
 	
 	local minimizerSize = Mobile and UDim2.new(0.08, 0, 0.1642, 0) or UDim2.fromOffset(50, 50)
 	local minimizerPosition = Mobile and UDim2.new(0.45, 0, 0.025, 0) or UDim2.new(0.02, 0, 0.5, 0)
-	local cornerRadius = Mobile and UDim.new(0.25, 0) or UDim.new(1, 0)
 
 	Window.Minimizer = New("Frame", {
 		Parent = GUI,
 		Size = minimizerSize,
 		Position = minimizerPosition,
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 0.5,
+		BackgroundTransparency = 0.2,
 		BorderSizePixel = 0,
 		ZIndex = 999999999,
 		Visible = false,
+		ThemeTag = {
+			BackgroundColor3 = "AcrylicMain",
+		},
 	}, {
 		New("UICorner", {
-			CornerRadius = cornerRadius,
+			CornerRadius = UDim.new(1, 0),
 		}),
 		New("TextButton", {
 			Name = "MinimizeButton",
@@ -6169,7 +6170,7 @@ function Library:CreateWindow(Config)
 				PaddingTop = UDim.new(0, 2),
 			}),
 			New("ImageLabel", {
-				Image = Mobile and (Button_Icon ~= "" and Button_Icon or "rbxassetid://10734897102") or "rbxassetid://10734897102",
+				Image = Icon or "rbxassetid://10734897102",
 				Size = UDim2.new(1, 0, 1, 0),
 				BackgroundTransparency = 1,
 			}, {
