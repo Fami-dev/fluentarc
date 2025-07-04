@@ -2702,13 +2702,16 @@ Components.Window = (function()
 			Window.ContainerHolder
 		})
 
-		Window.Root = New("Frame", {
+		Window.Root = New("CanvasGroup", {
 			BackgroundTransparency = 1,
 			Size = Window.Size,
 			Position = Window.Position,
 			Parent = GUI,
 			ClipsDescendants = true,
+			GroupTransparency = 1,
+			AnchorPoint = Vector2.new(0.5, 0.5)
 		}, {
+			New("UIScale"),
 			New("ImageLabel", {
 				Name = "Shadow",
 				Image = "rbxassetid://5554236805",
@@ -2749,6 +2752,22 @@ Components.Window = (function()
 			X = Window.Position.X.Offset,
 			Y = Window.Position.Y.Offset,
 		})
+
+		Window.Root.Position = Window.Position + UDim2.fromOffset(Window.Size.X.Offset / 2, Window.Size.Y.Offset / 2)
+
+		local AnimationMotor = Flipper.GroupMotor.new({
+			Scale = 0.8,
+			Transparency = 1
+		})
+
+		local windowScale = Window.Root:FindFirstChildOfClass("UIScale")
+
+		AnimationMotor:onStep(function(values)
+			if windowScale then
+				windowScale.Scale = values.Scale
+			end
+			Window.Root.GroupTransparency = values.Transparency
+		end)
 
 		_G.CDDrag = 0
 		Window.SelectorPosMotor = Flipper.SingleMotor.new(17)
@@ -2792,6 +2811,24 @@ Components.Window = (function()
 			Window.ContainerAnim.Position = UDim2.fromOffset(0, Value)
 		end)
 
+		function Window:AnimateIn()
+			Window.Root.Visible = true
+			AnimationMotor:setGoal({
+				Scale = Flipper.Spring.new(1, { frequency = 4, dampingRatio = 0.7 }),
+				Transparency = Flipper.Spring.new(0, { frequency = 3 })
+			})
+		end
+		
+		function Window:AnimateOut(callback)
+			AnimationMotor:setGoal({
+				Scale = Flipper.Spring.new(0.8, { frequency = 5, dampingRatio = 0.8 }),
+				Transparency = Flipper.Spring.new(1, { frequency = 4 })
+			})
+			if callback then
+				AnimationMotor:onComplete(callback)
+			end
+		end
+
 		Window.Maximize = function(Value, NoPos, Instant)
 			Window.Maximized = Value
 			Window.TitleBar.MaxButton.Frame.Icon.Image = Value and Components.Assets.Restore or Components.Assets.Max
@@ -2812,8 +2849,9 @@ Components.Window = (function()
 				
 				local targetSizeX = currentViewportSize.X
 				local targetSizeY = currentViewportSize.Y - inset.Y - 10
-				local targetPosX = 0
-				local targetPosY = 0
+				local targetPosX = targetSizeX / 2
+				local targetPosY = targetSizeY / 2
+				Window.Root.AnchorPoint = Vector2.new(0.5, 0.5)
 
 				SizeMotor:setGoal({
 					X = Flipper[Instant and "Instant" or "Spring"].new(targetSizeX, { frequency = 8, dampingRatio = 1 }),
@@ -2829,6 +2867,7 @@ Components.Window = (function()
 				end
 			else
 				if OldSize and OldPosition then
+					Window.Root.AnchorPoint = Vector2.new(0, 0)
 					SizeMotor:setGoal({
 						X = Flipper[Instant and "Instant" or "Spring"].new(OldSize.X.Offset, { frequency = 8, dampingRatio = 1 }),
 						Y = Flipper[Instant and "Instant" or "Spring"].new(OldSize.Y.Offset, { frequency = 8, dampingRatio = 1 }),
@@ -2896,12 +2935,18 @@ Components.Window = (function()
 				local newX = StartPos.X.Offset + Delta.X
 				local newY = StartPos.Y.Offset + Delta.Y
 
-				local usableHeight = currentViewportSize.Y
+				if not Window.Maximized then
+					Window.Root.AnchorPoint = Vector2.new(0, 0)
+					local usableHeight = currentViewportSize.Y
 
-				newX = math.clamp(newX, 0, math.max(0, currentViewportSize.X - windowSize.X))
-				newY = math.clamp(newY, 0, math.max(0, usableHeight - windowSize.Y))
+					newX = math.clamp(newX, 0, math.max(0, currentViewportSize.X - windowSize.X))
+					newY = math.clamp(newY, 0, math.max(0, usableHeight - windowSize.Y))
 				
-				Window.Position = UDim2.fromOffset(newX, newY)
+					Window.Position = UDim2.fromOffset(newX, newY)
+				else
+					Window.Root.AnchorPoint = Vector2.new(0.5, 0.5)
+					Window.Position = UDim2.fromOffset(newX, newY)
+				end
 
 				PosMotor:setGoal({
 					X = Instant(Window.Position.X.Offset),
@@ -2967,17 +3012,19 @@ Components.Window = (function()
 
 		function Window:Minimize(isClosing)
 			if isClosing then
-				isHiddenByClose = true
-				Window.Root.Visible = false
-				if Window.Minimizer then
-					Window.Minimizer.Visible = true
-				end
+				Window:AnimateOut(function()
+					isHiddenByClose = true
+					Window.Root.Visible = false
+					if Window.Minimizer then
+						Window.Minimizer.Visible = true
+					end
+				end)
 				return
 			end
 
 			if isHiddenByClose then
 				isHiddenByClose = false
-				Window.Root.Visible = true
+				Window:AnimateIn()
 				if Window.Minimizer then
 					Window.Minimizer.Visible = false
 				end
@@ -3014,6 +3061,8 @@ Components.Window = (function()
 				end
 			end
 		end
+
+		Window:AnimateIn()
 
 		function Window:Destroy()
 			if Library.UseAcrylic then
@@ -6249,6 +6298,7 @@ function Library:CreateWindow(Config, KeyConfig)
 			AutomaticSize = Enum.AutomaticSize.Y,
 			Position = UDim2.fromScale(0.5, 0.5),
 			AnchorPoint = Vector2.new(0.5, 0.5),
+			GroupTransparency = 1,
 			Parent = KeySystemTint,
 			ThemeTag = {
 				BackgroundColor3 = "Dialog"
@@ -6262,25 +6312,43 @@ function Library:CreateWindow(Config, KeyConfig)
 				ThemeTag = {
 					Color = "DialogBorder"
 				}
-			})
+			}),
+			New("UIScale")
 		})
 
-        local keyContentHolder = New("Frame", {
-            Size = UDim2.new(1, 0, 0, 0),
-            AutomaticSize = Enum.AutomaticSize.Y,
-            BackgroundTransparency = 1,
-            Parent = KeyWindow,
-        }, {
-            New("UIListLayout", {
-                HorizontalAlignment = Enum.HorizontalAlignment.Center,
-                SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 15)
-            }),
-            New("UIPadding", {
-                PaddingTop = UDim.new(0, 20),
-                PaddingBottom = UDim.new(0, 20)
-            })
-        })
+		local keyWindowMotor = Flipper.GroupMotor.new({
+			Scale = 0.8,
+			Transparency = 1
+		})
+
+		local keyWindowScale = KeyWindow:FindFirstChildOfClass("UIScale")
+
+		keyWindowMotor:onStep(function(values)
+			keyWindowScale.Scale = values.Scale
+			KeyWindow.GroupTransparency = values.Transparency
+		end)
+
+		keyWindowMotor:setGoal({
+			Scale = Flipper.Spring.new(1, { frequency = 4, dampingRatio = 0.7 }),
+			Transparency = Flipper.Spring.new(0, { frequency = 3 })
+		})
+
+		local keyContentHolder = New("Frame", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Parent = KeyWindow,
+		}, {
+			New("UIListLayout", {
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				Padding = UDim.new(0, 15)
+			}),
+			New("UIPadding", {
+				PaddingTop = UDim.new(0, 20),
+				PaddingBottom = UDim.new(0, 20)
+			})
+		})
 
 		local Title = New("TextLabel", {
 			Size = UDim2.new(1, -40, 0, 30),
@@ -6291,13 +6359,13 @@ function Library:CreateWindow(Config, KeyConfig)
 			BackgroundTransparency = 1,
 			Parent = keyContentHolder
 		}, {
-            New("UIGradient", {
-                ThemeTag = {
-                    Color = "Accent"
-                },
-                Rotation = 90
-            })
-        })
+			New("UIGradient", {
+				ThemeTag = {
+					Color = "Accent"
+				},
+				Rotation = 90
+			})
+		})
 
 		local InputHolder = New("Frame", {
 			Size = UDim2.new(1, -40, 0, 40),
@@ -6315,48 +6383,54 @@ function Library:CreateWindow(Config, KeyConfig)
 		KeyInput.Frame.Size = UDim2.new(1, -110, 1, -8)
 		KeyInput.Input.PlaceholderText = "ARCVOUR-0000-0000"
 
-        New("ImageLabel", {
-            Size = UDim2.fromOffset(20, 20),
-            Position = UDim2.new(0, 12, 0.5, 0),
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Image = Library:GetIcon("key"),
-            BackgroundTransparency = 1,
-            Parent = KeyInput.Frame,
-            ThemeTag = {
-                ImageColor3 = "SubText"
-            }
-        })
-        
-        KeyInput.Container.Position = UDim2.new(0, 6 + 22, 0, 0)
-        KeyInput.Container.Size = UDim2.new(1, -12 - 22, 1, 0)
+		New("ImageLabel", {
+			Size = UDim2.fromOffset(20, 20),
+			Position = UDim2.new(0, 12, 0.5, 0),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Image = Library:GetIcon("key"),
+			BackgroundTransparency = 1,
+			Parent = KeyInput.Frame,
+			ThemeTag = {
+				ImageColor3 = "SubText"
+			}
+		})
+
+		KeyInput.Container.Position = UDim2.new(0, 6 + 22, 0, 0)
+		KeyInput.Container.Size = UDim2.new(1, -12 - 22, 1, 0)
 
 		local VerifyButton = Components.Button("", InputHolder, true)
 		VerifyButton.Frame.Size = UDim2.fromOffset(100, 32)
 		VerifyButton.Title.Text = "Verify"
-        VerifyButton.Title.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-        VerifyButton.Frame.BackgroundColor3 = Creator.GetThemeProperty("AccentColorLight")
-        Creator.OverrideTag(VerifyButton.Frame, {})
+		VerifyButton.Title.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+		VerifyButton.Frame.BackgroundColor3 = Creator.GetThemeProperty("AccentColorLight")
+		Creator.OverrideTag(VerifyButton.Frame, {})
 
-        if KeyConfig.Description then
-            local DescriptionLabel = New("TextLabel", {
-                Size = UDim2.new(1, -50, 0, 0),
-                Text = KeyConfig.Description,
-                Font = Enum.Font.Gotham,
-                TextSize = 13,
-                TextWrapped = true,
-                BackgroundTransparency = 1,
-                AutomaticSize = Enum.AutomaticSize.Y,
-                Parent = keyContentHolder,
-                ThemeTag = {
-                    TextColor3 = "SubText"
-                }
-            })
-        end
+		if KeyConfig.Description then
+			local DescriptionLabel = New("TextLabel", {
+				Size = UDim2.new(1, -50, 0, 0),
+				Text = KeyConfig.Description,
+				Font = Enum.Font.Gotham,
+				TextSize = 13,
+				TextWrapped = true,
+				BackgroundTransparency = 1,
+				AutomaticSize = Enum.AutomaticSize.Y,
+				Parent = keyContentHolder,
+				ThemeTag = {
+					TextColor3 = "SubText"
+				}
+			})
+		end
 
 		Creator.AddSignal(VerifyButton.Frame.MouseButton1Click, function()
 			if KeyInput.Input.Text == KeyConfig.Key then
 				Library:Notify({ Title = "Success", Content = "Key verified.", Duration = 3 })
-				keyVerifiedSignal:fire()
+				keyWindowMotor:setGoal({
+					Scale = Flipper.Spring.new(0.8, { frequency = 5, dampingRatio = 0.8 }),
+					Transparency = Flipper.Spring.new(1, { frequency = 4 })
+				})
+				keyWindowMotor:onComplete(function()
+					keyVerifiedSignal:fire()
+				end)
 			else
 				Library:Notify({ Title = "Error", Content = "Invalid key provided.", Duration = 4 })
 				KeyInput.Input.Text = ""
