@@ -6032,12 +6032,14 @@ function Library:CreateWindow(Config)
 		Acrylic.init()
 	end
 
-	local finalIcon = nil
-	if Config.Icon and type(Config.Icon) == "string" and Config.Icon ~= "" then
-		if string.sub(Config.Icon, 1, 13) == "rbxassetid://" then
-			finalIcon = Config.Icon
-		else
-			finalIcon = Library:GetIcon(Config.Icon)
+	local Icon = Config.Icon
+	if not fischbypass then 
+		if Library:GetIcon(Icon) then
+			Icon = Library:GetIcon(Icon)
+		end
+
+		if Icon == "" or Icon == nil then
+			Icon = nil
 		end
 	end
 
@@ -6045,7 +6047,7 @@ function Library:CreateWindow(Config)
 		Parent = GUI,
 		Size = Config.Size,
 		Title = Config.Title,
-		Icon = finalIcon,
+		Icon = Icon,
 		SubTitle = Config.SubTitle,
 		TabWidth = Config.TabWidth,
 	})
