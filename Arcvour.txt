@@ -1869,7 +1869,9 @@ Components.Dialog = (function()
 			TintTransparency(1)
 			RootTransparency(1)
 			Scale(1.1)
-			NewDialog.Root.UIStroke:Destroy()
+			if NewDialog.Root and NewDialog.Root.UIStroke then
+				NewDialog.Root.UIStroke:Destroy()
+			end
 			task.wait(0.15)
 			NewDialog.TintFrame:Destroy()
 		end
@@ -2813,6 +2815,9 @@ Components.Window = (function()
 
 		function Window:AnimateIn()
 			Window.Root.Visible = true
+			if Window.ContainerCanvas and Window.ContainerCanvas.Glow then
+				Window.ContainerCanvas.Glow.Visible = true
+			end
 			AnimationMotor:setGoal({
 				Scale = Flipper.Spring.new(1, { frequency = 3, dampingRatio = 0.75 }),
 				Transparency = Flipper.Spring.new(0, { frequency = 2.5 })
@@ -2820,6 +2825,9 @@ Components.Window = (function()
 		end
 		
 		function Window:AnimateOut(callback)
+			if Window.ContainerCanvas and Window.ContainerCanvas.Glow then
+				Window.ContainerCanvas.Glow.Visible = false
+			end
 			AnimationMotor:setGoal({
 				Scale = Flipper.Spring.new(0.8, { frequency = 3, dampingRatio = 0.8 }),
 				Transparency = Flipper.Spring.new(1, { frequency = 2.5 })
@@ -2828,7 +2836,9 @@ Components.Window = (function()
 				local onCompleteConnection
 				onCompleteConnection = AnimationMotor:onComplete(function()
 					callback()
-					onCompleteConnection:disconnect()
+					if onCompleteConnection and onCompleteConnection.disconnect then
+						onCompleteConnection:disconnect()
+					end
 				end)
 			end
 		end
@@ -6291,7 +6301,7 @@ function Library:CreateWindow(Config, KeyConfig)
 
 		local KeySystemTint = New("Frame", {
 			Size = UDim2.fromScale(1, 1),
-			BackgroundColor3 = Color3.new(),
+			BackgroundColor3 = Color3.new(0, 0, 0),
 			BackgroundTransparency = 1,
 			Parent = GUI,
 			ZIndex = 99999
@@ -6322,19 +6332,22 @@ function Library:CreateWindow(Config, KeyConfig)
 
 		local keyWindowMotor = Flipper.GroupMotor.new({
 			Scale = 0.8,
-			Transparency = 1
+			WindowTransparency = 1,
+			TintTransparency = 1
 		})
 
 		local keyWindowScale = KeyWindow:FindFirstChildOfClass("UIScale")
 
 		keyWindowMotor:onStep(function(values)
 			keyWindowScale.Scale = values.Scale
-			KeyWindow.GroupTransparency = values.Transparency
+			KeyWindow.GroupTransparency = values.WindowTransparency
+			KeySystemTint.BackgroundTransparency = values.TintTransparency
 		end)
 
 		keyWindowMotor:setGoal({
 			Scale = Flipper.Spring.new(1, { frequency = 3, dampingRatio = 0.75 }),
-			Transparency = Flipper.Spring.new(0, { frequency = 2.5 })
+			WindowTransparency = Flipper.Spring.new(0, { frequency = 2.5 }),
+			TintTransparency = Flipper.Spring.new(0.4, { frequency = 2.5 })
 		})
 
 		local keyContentHolder = New("Frame", {
@@ -6430,13 +6443,16 @@ function Library:CreateWindow(Config, KeyConfig)
 				Library:Notify({ Title = "Success", Content = "Key verified.", Duration = 3 })
 				keyWindowMotor:setGoal({
 					Scale = Flipper.Spring.new(0.8, { frequency = 3, dampingRatio = 0.8 }),
-					Transparency = Flipper.Spring.new(1, { frequency = 2.5 })
+					WindowTransparency = Flipper.Spring.new(1, { frequency = 2.5 }),
+					TintTransparency = Flipper.Spring.new(1, { frequency = 2.5 })
 				})
 				
 				local onCompleteConnection
 				onCompleteConnection = keyWindowMotor:onComplete(function()
 					keyVerifiedSignal:fire()
-					onCompleteConnection:disconnect()
+					if onCompleteConnection and onCompleteConnection.disconnect then
+						onCompleteConnection:disconnect()
+					end
 				end)
 			else
 				Library:Notify({ Title = "Error", Content = "Invalid key provided.", Duration = 4 })
@@ -6445,6 +6461,7 @@ function Library:CreateWindow(Config, KeyConfig)
 		end)
 
 		keyVerifiedSignal:wait()
+		task.wait(0.3)
 		KeySystemTint:Destroy()
 	end
 
