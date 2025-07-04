@@ -6246,6 +6246,24 @@ function Library:CreateWindow(Config, KeyConfig)
 	if KeyConfig and KeyConfig.Enabled then
 		local keyVerifiedSignal = Signal.new()
 
+		local function trim(s)
+			return s:match("^%s*(.-)%s*$")
+		end
+
+		local actualKey = KeyConfig.Key
+		if type(actualKey) == "string" and actualKey:sub(1, 4) == "http" then
+			local success, keyContent = pcall(function()
+				return game:HttpGet(actualKey, true)
+			end)
+	
+			if success and keyContent then
+				actualKey = trim(keyContent)
+			else
+				print("Fluent: Gagal mengambil kunci dari URL. Verifikasi akan gagal.")
+				actualKey = httpService:GenerateGUID(false)
+			end
+		end
+
 		local KeySystemTint = New("Frame", {
 			Size = UDim2.fromScale(1, 1),
 			BackgroundTransparency = 1,
@@ -6382,7 +6400,7 @@ function Library:CreateWindow(Config, KeyConfig)
 		end
 
 		Creator.AddSignal(VerifyButton.Frame.MouseButton1Click, function()
-			if KeyInput.Input.Text == KeyConfig.Key then
+			if KeyInput.Input.Text == actualKey then
 				Library:Notify({ Title = "Success", Content = "Key verified.", Duration = 3 })
 				keyWindowMotor:setGoal({
 					Scale = Flipper.Spring.new(0.8, { frequency = 3, dampingRatio = 0.8 }),
