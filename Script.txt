@@ -12,7 +12,8 @@ local Window = Fluent:CreateWindow({
 }, {
     Enabled = true,
     KeySystemTitle = "ArcvourHUB",
-    Key = "ARCVOUR-KEY"
+    Key = "ARCVOUR-KEY",
+    Description = "Enter the key provided to access the script."
 })
 
 local Tabs = {
