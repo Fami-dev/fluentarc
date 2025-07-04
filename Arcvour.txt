@@ -2712,16 +2712,13 @@ Components.Window = (function()
 			Window.ContainerHolder
 		})
 
-		Window.Root = New("CanvasGroup", {
+		Window.Root = New("Frame", {
 			BackgroundTransparency = 1,
 			Size = Window.Size,
 			Position = Window.Position,
 			Parent = GUI,
 			ClipsDescendants = true,
-			GroupTransparency = 1,
-			AnchorPoint = Vector2.new(0.5, 0.5)
 		}, {
-			New("UIScale"),
 			New("ImageLabel", {
 				Name = "Shadow",
 				Image = "rbxassetid://5554236805",
@@ -2762,22 +2759,6 @@ Components.Window = (function()
 			X = Window.Position.X.Offset,
 			Y = Window.Position.Y.Offset,
 		})
-
-		Window.Root.Position = Window.Position + UDim2.fromOffset(Window.Size.X.Offset / 2, Window.Size.Y.Offset / 2)
-
-		local AnimationMotor = Flipper.GroupMotor.new({
-			Scale = 0.8,
-			Transparency = 1
-		})
-
-		local windowScale = Window.Root:FindFirstChildOfClass("UIScale")
-
-		AnimationMotor:onStep(function(values)
-			if windowScale then
-				windowScale.Scale = values.Scale
-			end
-			Window.Root.GroupTransparency = values.Transparency
-		end)
 
 		_G.CDDrag = 0
 		Window.SelectorPosMotor = Flipper.SingleMotor.new(17)
@@ -2821,36 +2802,6 @@ Components.Window = (function()
 			Window.ContainerAnim.Position = UDim2.fromOffset(0, Value)
 		end)
 
-		function Window:AnimateIn()
-			Window.Root.Visible = true
-			if Window.ContainerCanvas and Window.ContainerCanvas.Glow then
-				Window.ContainerCanvas.Glow.Visible = true
-			end
-			AnimationMotor:setGoal({
-				Scale = Flipper.Spring.new(1, { frequency = 3, dampingRatio = 0.75 }),
-				Transparency = Flipper.Spring.new(0, { frequency = 2.5 })
-			})
-		end
-		
-		function Window:AnimateOut(callback)
-			if Window.ContainerCanvas and Window.ContainerCanvas.Glow then
-				Window.ContainerCanvas.Glow.Visible = false
-			end
-			AnimationMotor:setGoal({
-				Scale = Flipper.Spring.new(0.8, { frequency = 3, dampingRatio = 0.8 }),
-				Transparency = Flipper.Spring.new(1, { frequency = 2.5 })
-			})
-			if callback then
-				local onCompleteConnection
-				onCompleteConnection = AnimationMotor:onComplete(function()
-					callback()
-					if onCompleteConnection and onCompleteConnection.disconnect then
-						onCompleteConnection:disconnect()
-					end
-				end)
-			end
-		end
-
 		Window.Maximize = function(Value, NoPos, Instant)
 			Window.Maximized = Value
 			Window.TitleBar.MaxButton.Frame.Icon.Image = Value and Components.Assets.Restore or Components.Assets.Max
@@ -2871,9 +2822,8 @@ Components.Window = (function()
 				
 				local targetSizeX = currentViewportSize.X
 				local targetSizeY = currentViewportSize.Y - inset.Y - 10
-				local targetPosX = targetSizeX / 2
-				local targetPosY = targetSizeY / 2
-				Window.Root.AnchorPoint = Vector2.new(0.5, 0.5)
+				local targetPosX = 0
+				local targetPosY = 0
 
 				SizeMotor:setGoal({
 					X = Flipper[Instant and "Instant" or "Spring"].new(targetSizeX, { frequency = 8, dampingRatio = 1 }),
@@ -2889,7 +2839,6 @@ Components.Window = (function()
 				end
 			else
 				if OldSize and OldPosition then
-					Window.Root.AnchorPoint = Vector2.new(0, 0)
 					SizeMotor:setGoal({
 						X = Flipper[Instant and "Instant" or "Spring"].new(OldSize.X.Offset, { frequency = 8, dampingRatio = 1 }),
 						Y = Flipper[Instant and "Instant" or "Spring"].new(OldSize.Y.Offset, { frequency = 8, dampingRatio = 1 }),
@@ -2957,18 +2906,12 @@ Components.Window = (function()
 				local newX = StartPos.X.Offset + Delta.X
 				local newY = StartPos.Y.Offset + Delta.Y
 
-				if not Window.Maximized then
-					Window.Root.AnchorPoint = Vector2.new(0, 0)
-					local usableHeight = currentViewportSize.Y
+				local usableHeight = currentViewportSize.Y
 
-					newX = math.clamp(newX, 0, math.max(0, currentViewportSize.X - windowSize.X))
-					newY = math.clamp(newY, 0, math.max(0, usableHeight - windowSize.Y))
+				newX = math.clamp(newX, 0, math.max(0, currentViewportSize.X - windowSize.X))
+				newY = math.clamp(newY, 0, math.max(0, usableHeight - windowSize.Y))
 				
-					Window.Position = UDim2.fromOffset(newX, newY)
-				else
-					Window.Root.AnchorPoint = Vector2.new(0.5, 0.5)
-					Window.Position = UDim2.fromOffset(newX, newY)
-				end
+				Window.Position = UDim2.fromOffset(newX, newY)
 
 				PosMotor:setGoal({
 					X = Instant(Window.Position.X.Offset),
@@ -3034,19 +2977,17 @@ Components.Window = (function()
 
 		function Window:Minimize(isClosing)
 			if isClosing then
-				Window:AnimateOut(function()
-					isHiddenByClose = true
-					Window.Root.Visible = false
-					if Window.Minimizer then
-						Window.Minimizer.Visible = true
-					end
-				end)
+				isHiddenByClose = true
+				Window.Root.Visible = false
+				if Window.Minimizer then
+					Window.Minimizer.Visible = true
+				end
 				return
 			end
 
 			if isHiddenByClose then
 				isHiddenByClose = false
-				Window:AnimateIn()
+				Window.Root.Visible = true
 				if Window.Minimizer then
 					Window.Minimizer.Visible = false
 				end
@@ -3083,8 +3024,6 @@ Components.Window = (function()
 				end
 			end
 		end
-
-		Window:AnimateIn()
 
 		function Window:Destroy()
 			if Library.UseAcrylic then
